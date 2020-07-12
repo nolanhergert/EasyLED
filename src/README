@@ -3,3 +3,12 @@ Should save off previous settings in a backwards compatible and forwards compati
 Try to compile in a library locally to PlatformIO so you can set the default of the logging to true. https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266HTTPUpdateServer/src/ESP8266HTTPUpdateServer.h
 
 Also try to make the ESP8266 set up so android/others don't complain about not having web access and boot you off the network when on home wifi.
+
+
+Popup screen should have:
+  * Number of LEDs on strip, or if it has something else on it (Servo, motor, horn, single PWM led)
+  * Pattern
+  * Speed
+  * Set colors (primary colors?)
+  * Paste script? (can be dynamic)
+  * Set sequence?? (not sure what I menat here)
