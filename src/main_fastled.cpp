@@ -19,16 +19,13 @@ FASTLED_USING_NAMESPACE
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
-// Using D1-D8
-//#define DATA_PIN    D6
-//#define CLK_PIN   4
-
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define NUM_LEDS    32
+// For now just do the same pattern for each strip
 CRGB leds[NUM_LEDS];
 
-#define BRIGHTNESS          96
+#define BRIGHTNESS         255
 #define FRAMES_PER_SECOND  120
 
 
@@ -112,10 +109,41 @@ void nextPattern()
 
 
 
+
+CRGBPalette16 currentPalette(CRGB::Black);
+CRGBPalette16 targetPalette(OceanColors_p);
+void fillnoise8() {
+
+  #define scale 30                                                          // Don't change this programmatically or everything shakes.
+  
+  for(int i = 0; i < NUM_LEDS; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
+    uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
+    leds[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+  }
+
+  
+  EVERY_N_MILLIS(10) {
+    nblendPaletteTowardPalette(currentPalette, targetPalette, 48);          // Blend towards the target palette over 48 iterations.
+  }
+ 
+  EVERY_N_SECONDS(5) {                                                      // Change the target palette to a random one every 5 seconds.
+    uint8_t baseC=random8();
+    targetPalette = CRGBPalette16(CHSV(baseC+random8(32), 255, random8(128,255)),   // Create palettes with similar colours.
+                                  CHSV(baseC+random8(64), 255, random8(128,255)),
+                                  CHSV(baseC+random8(96), 192, random8(128,255)),
+                                  CHSV(baseC+random8(16), 255, random8(128,255)));
+  }
+
+} // fillnoise8()
+
+
 void setup_FastLED() {
-  int i = 0;
+
   delay(1000); // 1 second delay for recovery
   
+  // set master brightness control
+  FastLED.setBrightness(BRIGHTNESS);
+
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,D1,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.addLeds<LED_TYPE,D2,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -124,12 +152,7 @@ void setup_FastLED() {
   FastLED.addLeds<LED_TYPE,D5,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  
-  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-
-  // set master brightness control
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip); 
 }
 
 

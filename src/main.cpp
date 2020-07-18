@@ -1,9 +1,16 @@
 //Thanks gdsports!
 // https://forum.arduino.cc/index.php?topic=499399.msg3408025#msg3408025
 //Webserver.send_P(200, "text/html", INDEX_HTML);
+// Thanks Jason Coon!
+// https://github.com/jasoncoon/esp8266-fastled-webserver/
+// Thanks Bitluni!
+// https://github.com/bitluni/bitluniHomeAutomation/
 
 #include "index_html.h"
 #include "main_fastled.h"
+
+// Don't want this long term.
+#include <FastLED.h>
 
 
 /*
@@ -56,8 +63,22 @@ void handleRoot() {
   server.send(200, "text/html", INDEX_HTML);
 }
 
+void handleNotFound(){
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET)?"GET":"POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i=0; i<server.args(); i++){
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", message);
+}
+
 void setup() {
-  delay(1000);
   Serial.begin(115200);
   Serial.println();
   Serial.print("Configuring access point...");
@@ -78,6 +99,19 @@ void setup() {
   httpUpdater.setup(&server);
 
   server.on("/", handleRoot);
+  
+  server.on("/set", HTTP_GET, []() {
+    for (int i = 0; i < server.args(); i++) {
+      if (server.argName(i) == "brightness") {
+        FastLED.setBrightness(server.arg(i).toInt());
+      }
+    }
+    server.send(200);
+  });
+
+  server.onNotFound(handleNotFound);
+
+
   server.begin();
   Serial.println("HTTP server started");
 
