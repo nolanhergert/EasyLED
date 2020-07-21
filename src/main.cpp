@@ -79,6 +79,7 @@ void handleNotFound(){
 }
 
 void setup() {
+  delay(500);
   Serial.begin(115200);
   Serial.println();
   Serial.print("Configuring access point...");

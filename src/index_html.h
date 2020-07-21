@@ -16,12 +16,9 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 <label for="favcolor">Select your favorite color:</label>
 <input type="color" id="favcolor" name="favcolor" value="#ff0000">
 
-<label>Choose an ice cream flavor:
-  <select class="ice-cream" name="ice-cream">
-    <option value="">Select One …</option>
+<label>Choose a pattern:
+  <select class="pattern" name="pattern">
     <option value="chocolate">Chocolate</option>
-    <option value="255">Bright</option>
-    <option value="50">Dark</option>
   </select>
 </label>
 
@@ -36,7 +33,7 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 
 <script>
-const selectElement = document.querySelector('.ice-cream');
+const selectElement = document.querySelector('.pattern');
 selectElement.addEventListener('change', (event) => {
   fetch(`/set?brightness=${event.target.value}`);
 });

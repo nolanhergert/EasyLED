@@ -21,11 +21,14 @@ FASTLED_USING_NAMESPACE
 
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-#define NUM_LEDS    32
-// For now just do the same pattern for each strip
-CRGB leds[NUM_LEDS];
+#define TOTAL_NUM_LEDS    320 // just picking a number
+#define NUM_STRIPS 8
+uint32 offsets[NUM_STRIPS];
+uint32 lengths[NUM_STRIPS];
+CRGB leds[TOTAL_NUM_LEDS];
 
-#define BRIGHTNESS         255
+
+#define BRIGHTNESS         255 // can be dynamically changed though
 #define FRAMES_PER_SECOND  120
 
 
@@ -35,7 +38,7 @@ uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
   
 
-
+/*
 void rainbow() 
 {
   // FastLED's built-in rainbow generator
@@ -74,40 +77,6 @@ void sinelon()
   leds[pos] += CHSV( gHue, 255, 192);
 }
 
-void bpm()
-{
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for( int i = 0; i < NUM_LEDS; i++) { //9948
-    leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
-  }
-}
-
-void juggle() {
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for( int i = 0; i < 8; i++) {
-    leds[beatsin16( i+7, 0, NUM_LEDS-1 )] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
-}
-
-// List of patterns to cycle through.  Each is defined as a separate function below.
-typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm };
-
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-
-void nextPattern()
-{
-  // add one to the current pattern number, and wrap around at the end
-  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
-}
-
-
 
 
 CRGBPalette16 currentPalette(CRGB::Black);
@@ -135,32 +104,129 @@ void fillnoise8() {
   }
 
 } // fillnoise8()
+*/
+void bpm(CRGB LedsSubset[], uint32 LedsSubsetCount)
+{
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+  uint8_t BeatsPerMinute = 62;
+  CRGBPalette16 palette = PartyColors_p;
+  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+  for( uint32 i = 0; i < LedsSubsetCount; i++) { //9948
+    LedsSubset[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+  }
+}
+
+void juggle(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+  // eight colored dots, weaving in and out of sync with each other
+  fadeToBlackBy( LedsSubset, LedsSubsetCount, 20);
+  byte dothue = 0;
+  for( int i = 0; i < 8; i++) {
+    LedsSubset[beatsin16( i+7, 0, LedsSubsetCount-1 )] |= CHSV(dothue, 200, 255);
+    dothue += 32;
+  }
+}
 
 
+
+
+
+// List of patterns to cycle through.  Each is defined as a separate function below.
+typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
+//SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
+SimplePatternList gPatterns = { bpm };//, juggle };
+
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+
+void nextPattern()
+{
+  // add one to the current pattern number, and wrap around at the end
+  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
+}
+
+
+void RecomputeOffsets() {
+  int i = 0;
+  // Recompute offsets
+  offsets[0] = 0;
+  for (i = 1; i < NUM_STRIPS; i++) {
+    offsets[i] = offsets[i-1] + lengths[i-1];
+  }
+} 
+
+// Assume that we entered the new led strips in increasing
+// pin order and they are in this linked list in the same
+// order
+void SetLedStripParameters() {
+  CLEDController *pCur = CLEDController::head();
+  int i = 0;
+	while(pCur) {
+    pCur->setLeds(leds + offsets[i], lengths[i]);
+    i++;
+		pCur = pCur->next();
+	}
+}
+
+void AddNewLedStrip(int pin, int offset, int length) {
+  // I could have used an array here, but that's kind of complicated with templates, etc
+  // A solution would be nice, but this *works* for now and is small.
+  // Going with simple for now
+  //Serial.println("Alloc called");
+  switch (pin) {
+    case 0:
+      FastLED.addLeds<LED_TYPE,D1,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 1:
+      FastLED.addLeds<LED_TYPE,D2,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 2:
+      FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 3:
+      FastLED.addLeds<LED_TYPE,D4,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 4:
+      FastLED.addLeds<LED_TYPE,D5,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 5:
+      FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 6:
+      FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 7:
+      FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);        
+  }
+}
+
+#define TEMP_NUM_LEDS 32
+
+//static const 
 void setup_FastLED() {
 
+  int i = 0;
   delay(1000); // 1 second delay for recovery
+
+  
   
   // set master brightness control
   FastLED.setBrightness(BRIGHTNESS);
 
-  // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE,D1,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D2,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D4,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D5,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip); 
+  // Todo: LOAD VALUES FROM EEPROM
+  // And save them when changed without wearing out eeprom during testing.
+  for (i = 0; i < NUM_STRIPS; i++) {
+    lengths[i] = TEMP_NUM_LEDS;
+  }
+  RecomputeOffsets();
+  for (i = 0; i < NUM_STRIPS; i++) {
+    AddNewLedStrip(i, offsets[i], lengths[i]);
+  }  
 }
+
 
 
 
 void loop_FastLED()
 {
-  // Call the current pattern function once, updating the 'leds' array
-  gPatterns[gCurrentPatternNumber]();
+  int i = 0;
+
+  for (i = 0; i < NUM_STRIPS; i++) {
+    // Call the current pattern function once, updating the 'leds' array
+    gPatterns[gCurrentPatternNumber](&leds[offsets[i]], lengths[i]);
+  }
+
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
@@ -170,5 +236,28 @@ void loop_FastLED()
   // do some periodic updates
   EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
   EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+
+
+  EVERY_N_MILLISECONDS( 5 ) {
+    // Set all pixels to black
+    fadeToBlackBy( leds, TOTAL_NUM_LEDS, 255);
+    FastLED.show();
+
+    for (i = 0; i < NUM_STRIPS; i++) {
+      lengths[i] = (lengths[i] + 1)%TEMP_NUM_LEDS;
+    }
+    RecomputeOffsets();
+
+    // No performance difference between addLeds and setLeds, surprisingly
+    // And no additional entries on linked list
+    /*
+    for (i = 0; i < NUM_STRIPS; i++) {
+      AddNewLedStrip(i, offsets[i], lengths[i]);
+    }
+    */
+    SetLedStripParameters();
+    //Serial.println(ESP.getFreeHeap());
+  }
+  
 }
 
