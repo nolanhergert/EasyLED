@@ -1,4 +1,5 @@
 Should save off previous settings in a backwards compatible and forwards compatible way.
+  * Use ESP_EEPROM library too
 
 Try to compile in a library locally to PlatformIO so you can set the default of the logging to true. https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266HTTPUpdateServer/src/ESP8266HTTPUpdateServer.h
 
