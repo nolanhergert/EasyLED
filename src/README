@@ -1,14 +1,12 @@
 Should save off previous settings in a backwards compatible and forwards compatible way.
   * Use ESP_EEPROM library too
 
-Try to compile in a library locally to PlatformIO so you can set the default of the logging to true. https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266HTTPUpdateServer/src/ESP8266HTTPUpdateServer.h
-
 Also try to make the ESP8266 set up so android/others don't complain about not having web access and boot you off the network when on home wifi.
   * It's a setting on Android/iPhone to accept this
 
 Allow to set wifi credentials and whether to connect to a home wifi instead.
 
-Should have a way to reset EEPROM settings back to normal, externally pressable without opening hot glue case?
+Should have a way to reset EEPROM settings back to normal, externally controllable without opening hot glue case?
 
 Popup screen should have:
   * Number of LEDs on strip, or if it has something else on it (Servo, motor, horn, single PWM led)
@@ -16,4 +14,8 @@ Popup screen should have:
   * Speed
   * Set colors (primary colors?)
   * Paste script? (can be dynamic)
-  * Set sequence?? (not sure what I menat here)
+
+
+Pattern offset from another strip? Duplicated?
+
+Pattern programming. Transition time + list of patterns.

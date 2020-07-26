@@ -37,74 +37,45 @@ CRGB leds[TOTAL_NUM_LEDS];
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
   
+void rainbow(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+  fill_rainbow( LedsSubset, LedsSubsetCount, gHue, 7);
+}
 
-/*
-void rainbow() 
+void glitter(CRGB LedsSubset[], uint32 LedsSubsetCount, fract8 chanceOfGlitter) {
+  if( random8() < chanceOfGlitter) {
+    LedsSubset[ random16(LedsSubsetCount) ] += CRGB::White;
+  }
+}
+
+
+void rainbowWithGlitter(CRGB LedsSubset[], uint32 LedsSubsetCount) 
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+  rainbow(LedsSubset, LedsSubsetCount);
+  // Plus glitter!
+  glitter(LedsSubset, LedsSubsetCount, 80);
+
 }
 
 
-void addGlitter( fract8 chanceOfGlitter) 
-{
-  if( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
-  }
-}
-
-void rainbowWithGlitter() 
-{
-  // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
-  addGlitter(80);
-}
-
-
-void confetti() 
+void confetti(CRGB LedsSubset[], uint32 LedsSubsetCount) 
 {
   // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  leds[pos] += CHSV( gHue + random8(64), 200, 255);
+  fadeToBlackBy( LedsSubset, LedsSubsetCount, 10);
+  int pos = random16(LedsSubsetCount);
+  LedsSubset[pos] += CHSV( gHue + random8(64), 200, 255);
 }
 
-void sinelon()
+void sinelon(CRGB LedsSubset[], uint32 LedsSubsetCount)
 {
   // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16( 13, 0, NUM_LEDS-1 );
-  leds[pos] += CHSV( gHue, 255, 192);
+  fadeToBlackBy( LedsSubset, LedsSubsetCount, 20);
+  int pos = beatsin16( 13, 0, LedsSubsetCount-1 );
+  LedsSubset[pos] += CHSV( gHue, 255, 192);
 }
 
 
 
-CRGBPalette16 currentPalette(CRGB::Black);
-CRGBPalette16 targetPalette(OceanColors_p);
-void fillnoise8() {
-
-  #define scale 30                                                          // Don't change this programmatically or everything shakes.
-  
-  for(int i = 0; i < NUM_LEDS; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
-    uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
-    leds[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-  }
-
-  
-  EVERY_N_MILLIS(10) {
-    nblendPaletteTowardPalette(currentPalette, targetPalette, 48);          // Blend towards the target palette over 48 iterations.
-  }
- 
-  EVERY_N_SECONDS(5) {                                                      // Change the target palette to a random one every 5 seconds.
-    uint8_t baseC=random8();
-    targetPalette = CRGBPalette16(CHSV(baseC+random8(32), 255, random8(128,255)),   // Create palettes with similar colours.
-                                  CHSV(baseC+random8(64), 255, random8(128,255)),
-                                  CHSV(baseC+random8(96), 192, random8(128,255)),
-                                  CHSV(baseC+random8(16), 255, random8(128,255)));
-  }
-
-} // fillnoise8()
-*/
 void bpm(CRGB LedsSubset[], uint32 LedsSubsetCount)
 {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
@@ -128,12 +99,40 @@ void juggle(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 
 
 
+CRGBPalette16 currentPalette(CRGB::Black);
+CRGBPalette16 targetPalette(OceanColors_p);
+void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+
+  #define scale 30                                                          // Don't change this programmatically or everything shakes.
+  
+  for(uint32 i = 0; i < LedsSubsetCount; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
+    uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
+    LedsSubset[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+  }
+
+  
+  EVERY_N_MILLIS(10) {
+    nblendPaletteTowardPalette(currentPalette, targetPalette, 48);          // Blend towards the target palette over 48 iterations.
+  }
+ 
+  EVERY_N_SECONDS(5) {                                                      // Change the target palette to a random one every 5 seconds.
+    uint8_t baseC=random8();
+    targetPalette = CRGBPalette16(CHSV(baseC+random8(32), 255, random8(128,255)),   // Create palettes with similar colours.
+                                  CHSV(baseC+random8(64), 255, random8(128,255)),
+                                  CHSV(baseC+random8(96), 192, random8(128,255)),
+                                  CHSV(baseC+random8(16), 255, random8(128,255)));
+  }
+
+}
+
+
+
 
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
-SimplePatternList gPatterns = { bpm };//, juggle };
+SimplePatternList gPatterns = { fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -191,7 +190,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
   }
 }
 
-#define TEMP_NUM_LEDS 32
+#define TEMP_NUM_LEDS 25
 
 //static const 
 void setup_FastLED() {
@@ -224,7 +223,7 @@ void loop_FastLED()
 
   for (i = 0; i < NUM_STRIPS; i++) {
     // Call the current pattern function once, updating the 'leds' array
-    gPatterns[gCurrentPatternNumber](&leds[offsets[i]], lengths[i]);
+    gPatterns[i % ARRAY_SIZE( gPatterns)](&leds[offsets[i]], lengths[i]);
   }
 
 
@@ -235,8 +234,8 @@ void loop_FastLED()
 
   // do some periodic updates
   EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
-  EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
-
+  //EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+/*
 
   EVERY_N_MILLISECONDS( 5 ) {
     // Set all pixels to black
@@ -250,14 +249,13 @@ void loop_FastLED()
 
     // No performance difference between addLeds and setLeds, surprisingly
     // And no additional entries on linked list
-    /*
     for (i = 0; i < NUM_STRIPS; i++) {
-      AddNewLedStrip(i, offsets[i], lengths[i]);
+      //AddNewLedStrip(i, offsets[i], lengths[i]);
     }
-    */
     SetLedStripParameters();
     //Serial.println(ESP.getFreeHeap());
   }
+  */
   
 }
 
