@@ -21,6 +21,7 @@ Popup screen should have:
   * Set colors (primary colors?)
   * Paste script? (can be dynamic)
 
+Can select from list of patterns to make a custom pattern list? (sequence)
 
 Pattern offset from another strip? Duplicated?
 
