@@ -21,7 +21,7 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 .radio-toolbar {
   margin: 10px;
-  /* Only have room for two colums */
+  /* Only have room for two columns */
   width: 160px;
 }
 
@@ -101,8 +101,8 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 
 
-<label>Choose a pattern:
-  <select class="pattern" name="pattern">
+<label>Choose an action:
+  <select name="action">
     <option value="empty"></option>
     <option value="combine">_Combine With</option>
     <option value="Animation">Animation</option>
@@ -112,10 +112,17 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 <!-- HTML classes for customizing patterns chosen -->
 <div class="customizer" id="AnimationCustomizer">
+	<label>Pattern: 
+	  <select name="pattern">
+		<option value="Stars">Stars</option>
+		<option value="Stripes">Stripes</option>
+		<option value="Foo">Foo</option>
+		<option value="Bar">Bar</option>
+	  </select>
+	</label>
 	<div class="slidecontainer">
-	  Brightness:
+	  Global Brightness??!:
 	  <input type="range" min="1" max="255" value="50" class="slider" name="brightness" >
-	  
 	</div>
 
 	<label for="favcolor">Select your favorite color:</label>
@@ -126,7 +133,7 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 <div class="customizer" id="CombineCustomizer">
 	<label>Choose Pin: 
-	  <select class="pattern" name="combine_pin">
+	  <select name="combine_pin">
 		<option value="1">1</option>
 		<option value="2">2</option>
 		<option value="3">3</option>
@@ -149,25 +156,6 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 <script>
 
 
-// Set up defaults
-// Load already saved data from wemos d1 mini
-
-let activeCustomizer = 0;
-let currentPin = 1;
-
-
-
-
-function onInput(e) {
-  // Unfortunately we need this global handler
-  // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
-  // But we're just going to publish the currently active customizer
-  if (activeCustomizer != 0) {
-    activeCustomizer.publish();
-  }
-
-} 
-
 class AnimationCustomizer {
   constructor() {
     this.div = document.getElementById("AnimationCustomizer");
@@ -175,13 +163,13 @@ class AnimationCustomizer {
   
   setup() {
 	this.hide();
-	this.inputs = this.div.getElementsByTagName('input');
+	this.inputs = this.div.querySelectorAll('input, textarea, select');
 	// Set up onChanged callback for each input element
 	// to send out the full query string for the form (for now)
 	for (let input of this.inputs) {
 	  // We want to use oninput() as it's live, whereas onchanged()
 	  // is only after the object loses focus.
-	  input.oninput = onInput;
+	  input.oninput = onCustomizerInput;
 	}	
   }
   
@@ -215,20 +203,79 @@ class CombineCustomizer extends AnimationCustomizer {
 
 
 
-let animationCustomizer = new AnimationCustomizer();//.setup();
+
+
+// Set up defaults
+// Load already saved data from wemos d1 mini
+
+
+var customizers = [];
+var animationCustomizer = new AnimationCustomizer();//.setup();
 animationCustomizer.setup();
-let combineCustomizer = new CombineCustomizer();//.setup();
+customizers.push(animationCustomizer);
+var combineCustomizer = new CombineCustomizer();//.setup();
 combineCustomizer.setup();
+customizers.push(combineCustomizer);
+
+let activeCustomizer = animationCustomizer;
+let currentPin = 1;
+
+function onPinSelection(e) {
+  currentPin = e.target.value;
+  // TODO: Probably want to load saved form values from microcontroller here
+  // for the customizer
+  
+  // I would set the "save to eeprom frequency" to 5 seconds of inactivity. Maybe with a
+  // quick color change to show 
+}
+
+// Set pin handler
+document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
+
+/*
+
+Can't do without setting the size to be non-0 or non-1 and annoying! I think it's fine for mobile users
+
+
+
+// Thanks Mozilla Dev! https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event
+function onPatternMouseOver(e) {
+  // Need to set the current pattern
+  console.log(e.target.value);
+  // And then publish it. Maybe only it? Hmm...
+  activeCustomizer.publish();
+}
+
+// Pattern selector children (options)
+// Spreader??? https://stackoverflow.com/a/35970005/931280
+[...document.getElementsByName("pattern")[0].children].forEach(function (child) {
+  child.onmouseover = onPatternMouseOver;
+});
+
+document.getElementsByName("pattern")[0].onmouseover = onPatternMouseOver;
+
+*/
+
+function onCustomizerInput(e) {
+  // Unfortunately seems we can't have a div/class-specific oninput handler for elements
+  // inside the div/class, so let's 
+  // be clear that it's a global handler for the inputs in the customizer classes
+  // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
+  // But we're just going to publish the currently active customizer
+  activeCustomizer.publish();
+
+} 
+
+
 
 
 	
 
 // Selector on change
 const selectElement = document.querySelector('.pattern');
-selectElement.addEventListener('change', (event) => {
-  //hideAllCustomizers();
-  animationCustomizer.hide();
-  combineCustomizer.hide();
+document.getElementsByName("action")[0].addEventListener('change', (event) => {
+  // Hide all customizers
+  customizers.forEach(c => c.hide());
   
   switch(event.target.value) {
     case "Animation":
@@ -243,15 +290,7 @@ selectElement.addEventListener('change', (event) => {
 });
 
 
-// Pin selection on change
-var x = document.getElementsByName("radioPin");
-// loop through list
-for (var i=0, len=x.length; i<len; i++) {
-  x[i].onclick = function() { // assign onclick handler function to each
-    // put clicked radio button's value in total field
-    currentPin = this.value;
-  };
-}
+
 
 
 </script>
