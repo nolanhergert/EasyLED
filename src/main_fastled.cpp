@@ -21,11 +21,13 @@ FASTLED_USING_NAMESPACE
 
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-#define TOTAL_NUM_LEDS    320 // just picking a number
+#define TOTAL_NUM_LEDS    1000 // just picking a number
 #define NUM_STRIPS 8
 uint32 offsets[NUM_STRIPS];
 uint32 lengths[NUM_STRIPS];
 CRGB leds[TOTAL_NUM_LEDS];
+
+#define INITIAL_NUM_LEDS TOTAL_NUM_LEDS / NUM_STRIPS
 
 
 #define BRIGHTNESS         255 // can be dynamically changed though
@@ -94,6 +96,12 @@ void juggle(CRGB LedsSubset[], uint32 LedsSubsetCount) {
   }
 }
 
+void white(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+  for( int i = 0; i < LedsSubsetCount; i++) {
+    LedsSubset[i] = CHSV(170,255,255);
+  }
+}
+
 
 
 CRGBPalette16 currentPalette(CRGB::Black);
@@ -129,7 +137,7 @@ void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
-SimplePatternList gPatterns = { fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
+SimplePatternList gPatterns = { white, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -144,7 +152,7 @@ void RecomputeOffsets() {
   int i = 0;
   // Recompute offsets
   offsets[0] = 0;
-  for (i = 1; i < NUM_STRIPS; i++) {
+  for (uint i = 1; i < NUM_STRIPS; i++) {
     offsets[i] = offsets[i-1] + lengths[i-1];
   }
 } 
@@ -187,7 +195,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
   }
 }
 
-#define TEMP_NUM_LEDS 25
+
 
 //static const 
 void setup_FastLED() {
@@ -203,7 +211,7 @@ void setup_FastLED() {
   // Todo: LOAD VALUES FROM EEPROM
   // And save them when changed without wearing out eeprom during testing.
   for (i = 0; i < NUM_STRIPS; i++) {
-    lengths[i] = TEMP_NUM_LEDS;
+    lengths[i] = INITIAL_NUM_LEDS;
   }
   RecomputeOffsets();
   for (i = 0; i < NUM_STRIPS; i++) {
