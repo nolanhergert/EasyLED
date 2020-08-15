@@ -23,6 +23,7 @@ FASTLED_USING_NAMESPACE
 #define COLOR_ORDER GRB
 #define TOTAL_NUM_LEDS    1000 // just picking a number
 #define NUM_STRIPS 8
+uint32 patterns[NUM_STRIPS];
 uint32 offsets[NUM_STRIPS];
 uint32 lengths[NUM_STRIPS];
 CRGB leds[TOTAL_NUM_LEDS];
@@ -81,7 +82,7 @@ void bpm(CRGB LedsSubset[], uint32 LedsSubsetCount)
   uint8_t BeatsPerMinute = 62;
   CRGBPalette16 palette = PartyColors_p;
   uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for( uint32 i = 0; i < LedsSubsetCount; i++) { //9948
+  for( uint i = 0; i < LedsSubsetCount; i++) { //9948
     LedsSubset[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
   }
 }
@@ -90,14 +91,14 @@ void juggle(CRGB LedsSubset[], uint32 LedsSubsetCount) {
   // eight colored dots, weaving in and out of sync with each other
   fadeToBlackBy( LedsSubset, LedsSubsetCount, 20);
   byte dothue = 0;
-  for( int i = 0; i < 8; i++) {
+  for( uint i = 0; i < 8; i++) {
     LedsSubset[beatsin16( i+7, 0, LedsSubsetCount-1 )] |= CHSV(dothue, 200, 255);
     dothue += 32;
   }
 }
 
-void white(CRGB LedsSubset[], uint32 LedsSubsetCount) {
-  for( int i = 0; i < LedsSubsetCount; i++) {
+void color(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+  for( uint i = 0; i < LedsSubsetCount; i++) {
     LedsSubset[i] = CHSV(170,255,255);
   }
 }
@@ -137,7 +138,7 @@ void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
-SimplePatternList gPatterns = { white, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
+SimplePatternList gPatterns = { color, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -149,10 +150,10 @@ void nextPattern()
 
 
 void RecomputeOffsets() {
-  int i = 0;
+  uint i = 0;
   // Recompute offsets
   offsets[0] = 0;
-  for (uint i = 1; i < NUM_STRIPS; i++) {
+  for (i = 1; i < NUM_STRIPS; i++) {
     offsets[i] = offsets[i-1] + lengths[i-1];
   }
 } 
@@ -162,7 +163,7 @@ void RecomputeOffsets() {
 // order
 void SetLedStripParameters() {
   CLEDController *pCur = CLEDController::head();
-  int i = 0;
+  uint i = 0;
 	while(pCur) {
     pCur->setLeds(leds + offsets[i], lengths[i]);
     i++;

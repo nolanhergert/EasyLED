@@ -50,8 +50,30 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 
-#define SSID "LightBike"
+#include <iostream>
+#include <map>
+#include <string>
+
+#define SSID "EasyLED"
 // No password for now
+
+/*
+struct Pin {
+  uint32 version;
+  uint32 index;
+  uint32 function;
+  uint32 num_leds;
+  uint32 pattern;
+
+  CRGB colors[5]; // rgb
+
+  
+}
+*/
+
+typedef std::map<String, uint32> EasyLEDPin;
+EasyLEDPin pins[8];
+
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -59,6 +81,11 @@ ESP8266HTTPUpdateServer httpUpdater;
 /* Just a little test message.  Go to http://192.168.4.1 in a web browser
    connected to this access point to see it.
 */
+
+
+
+
+
 void handleRoot() {
   server.send(200, "text/html", INDEX_HTML);
 }
@@ -76,6 +103,16 @@ void handleNotFound(){
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
+}
+
+
+void ParsePin(EasyLEDPin pin) {
+  EasyLEDPin::iterator it = pin.find("pattern");
+  if(it != pin.end())
+{
+   //element found;
+   //b3 = it->second;
+}
 }
 
 void setup() {
@@ -102,10 +139,9 @@ void setup() {
   server.on("/", handleRoot);
   
   server.on("/set", HTTP_GET, []() {
-    for (int i = 0; i < server.args(); i++) {
-      if (server.argName(i) == "brightness") {
-        FastLED.setBrightness(server.arg(i).toInt());
-      }
+    // Very simple parsing for now. String for name and uint32 for value
+    for (int i = 1; i < server.args(); i++) {
+      pins[server.argName(0).toInt()][server.argName(i)] = server.arg(i).toInt();
     }
     server.send(200);
   });

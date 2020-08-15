@@ -1,12 +1,3 @@
-#include <avr/pgmspace.h>
-
-// For now just edit the below in a separate .html file that you create
-// However at some point, it'll be worth it to generate this .h file using
-// a build time script from an actual .html file that's checked in and slightly
-// easier to use! 
-// https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html
-const char INDEX_HTML[] PROGMEM = R"=====(
-
 
 <!DOCTYPE html>
 <html>
@@ -304,7 +295,3 @@ document.getElementsByName("pattern")[0].onmouseover = onPatternMouseOver;
 </script>
 </body>
 </html>
-
-
-
-)=====";
