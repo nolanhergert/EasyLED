@@ -47,7 +47,6 @@ void glitter(CRGB LedsSubset[], uint32 LedsSubsetCount, fract8 chanceOfGlitter) 
   }
 }
 
-
 void rainbowWithGlitter(CRGB LedsSubset[], uint32 LedsSubsetCount) 
 {
   // FastLED's built-in rainbow generator
@@ -73,8 +72,6 @@ void sinelon(CRGB LedsSubset[], uint32 LedsSubsetCount)
   int pos = beatsin16( 13, 0, LedsSubsetCount-1 );
   LedsSubset[pos] += CHSV( gHue, 255, 192);
 }
-
-
 
 void bpm(CRGB LedsSubset[], uint32 LedsSubsetCount)
 {

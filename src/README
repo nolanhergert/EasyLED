@@ -6,7 +6,8 @@ Also try to make the ESP8266 set up so android/others don't complain about not h
 
 Allow to set wifi credentials and whether to connect to a home wifi instead.
 
-Should have a way to reset EEPROM settings back to normal, externally controllable without opening hot glue case?
+Should have a way to reset EEPROM settings back to normal, externally 
+controllable without opening hot glue case?
 
 Popup screen should have:
   * Number of LEDs on strip, or if it has something else on it (Servo, motor, horn, single PWM led)
