@@ -152,11 +152,30 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+
   setup_FastLED();
   
 }
 
+uint16 b = 0;
+int8 inc = 1;
 void loop() {
   server.handleClient();
   loop_FastLED();
+
+/*
+  // Simple pulse for main blue LED
+  if (b == PWMRANGE) {
+    inc = -1;
+  } else if (b == 0) {
+    inc = 1;
+  }
+  analogWrite(LED_BUILTIN,b += inc);
+  // Also analogWriteFreq(); Default is 1KHz
+  delay(2);
+  */
+  
+
 }
