@@ -21,7 +21,7 @@ FASTLED_USING_NAMESPACE
 
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-#define TOTAL_NUM_LEDS    1000 // just picking a number
+#define TOTAL_NUM_LEDS    300 // just picking a number
 #define NUM_STRIPS 8
 uint32 patterns[NUM_STRIPS];
 uint32 offsets[NUM_STRIPS];
