@@ -57,22 +57,37 @@
 #define SSID "EasyLED"
 // No password for now
 
-/*
-struct Pin {
-  uint32 version;
-  uint32 index;
-  uint32 function;
-  uint32 num_leds;
-  uint32 pattern;
 
+typedef struct {
+  uint16 version;
+  uint8 function;
+  uint16 pattern;
+  uint16 num_leds;
+  uint16 offset;
+  // In decreasing importance
   CRGB colors[5]; // rgb
 
-  
-}
-*/
+  //128B total?
+  uint8 reserved[99];
+} EasyLEDPin;
 
-typedef std::map<String, uint32> EasyLEDPin;
+
 EasyLEDPin pins[8];
+
+
+void ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
+  if (argName == "function") {
+    pin->function = argValue.toInt();
+  } else if (argName == "num_leds") {
+    pin->num_leds = argValue.toInt();
+  } else if (argName == "pattern") {
+    pin->pattern = argValue.toInt();
+  } else {
+    Serial.print("Match not found for:");
+    Serial.println(argName);
+  }
+}
+
 
 
 ESP8266WebServer server(80);
@@ -81,9 +96,6 @@ ESP8266HTTPUpdateServer httpUpdater;
 /* Just a little test message.  Go to http://192.168.4.1 in a web browser
    connected to this access point to see it.
 */
-
-
-
 
 
 void handleRoot() {
@@ -105,16 +117,7 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
-
-void ParsePin(EasyLEDPin pin) {
-  EasyLEDPin::iterator it = pin.find("pattern");
-  if(it != pin.end())
-{
-   //element found;
-   //b3 = it->second;
-}
-}
-
+uint8 pin = 0;
 void setup() {
   delay(500);
   Serial.begin(115200);
@@ -140,8 +143,9 @@ void setup() {
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now. String for name and uint32 for value
+    pin = server.argName(0).toInt();
     for (int i = 1; i < server.args(); i++) {
-      pins[server.argName(0).toInt()][server.argName(i)] = server.arg(i).toInt();
+      ParsePinArg(&pins[pin], server.argName(i), server.arg(i));
     }
     server.send(200);
   });

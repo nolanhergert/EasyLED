@@ -171,6 +171,11 @@ void SetLedStripParameters() {
 	}
 }
 
+void ModifyLedStrip(int pin, int length, int pattern) {
+  lengths[pin] = length;
+  patterns[pin] = pattern;
+}
+
 void AddNewLedStrip(int pin, int offset, int length) {
   // I could have used an array here, but that's kind of complicated with templates, etc
   // A solution would be nice, but this *works* for now and is small.
@@ -217,6 +222,7 @@ void setup_FastLED() {
   RecomputeOffsets();
   for (i = 0; i < NUM_STRIPS; i++) {
     AddNewLedStrip(i, offsets[i], lengths[i]);
+    patterns[i] = i % ARRAY_SIZE( gPatterns);
   }  
 }
 
@@ -229,9 +235,8 @@ void loop_FastLED()
 
   for (i = 0; i < NUM_STRIPS; i++) {
     // Call the current pattern function once, updating the 'leds' array
-    gPatterns[i % ARRAY_SIZE( gPatterns)](&leds[offsets[i]], lengths[i]);
+    gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
   }
-
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
