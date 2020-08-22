@@ -1,18 +1,3 @@
-//Thanks gdsports!
-// https://forum.arduino.cc/index.php?topic=499399.msg3408025#msg3408025
-//Webserver.send_P(200, "text/html", INDEX_HTML);
-// Thanks Jason Coon!
-// https://github.com/jasoncoon/esp8266-fastled-webserver/
-// Thanks Bitluni!
-// https://github.com/bitluni/bitluniHomeAutomation/
-
-#include "index_html.h"
-#include "main_fastled.h"
-
-// Don't want this long term.
-#include <FastLED.h>
-
-
 /*
    Copyright (c) 2015, Majenko Technologies
    All rights reserved.
@@ -43,6 +28,19 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+//Thanks gdsports!
+// https://forum.arduino.cc/index.php?topic=499399.msg3408025#msg3408025
+//Webserver.send_P(200, "text/html", INDEX_HTML);
+// Thanks Jason Coon!
+// https://github.com/jasoncoon/esp8266-fastled-webserver/
+// Thanks Bitluni!
+// https://github.com/bitluni/bitluniHomeAutomation/
+
+#include "index_html.h"
+#include "main_fastled.h"
+
+#include <main.h>
+#include <FastLED.h>
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
@@ -59,36 +57,58 @@
 
 
 typedef struct {
-  uint16 version;
+  uint8 index;
   uint8 function;
   uint16 pattern;
   uint16 num_leds;
   uint16 offset;
   // In decreasing importance
-  CRGB colors[5]; // rgb
+  CRGB colors[NUM_COLORS]; // rgb
 
   //128B total?
-  uint8 reserved[99];
+  uint8 reserved[100];
 } EasyLEDPin;
 
+struct Cache {
+  uint16 version;
+  EasyLEDPin pins[8];
+};
 
-EasyLEDPin pins[8];
+Cache cache;
 
+
+void UpdateLedStrip(EasyLEDPin *pin) {
+  ModifyLedStrip(pin->index, pin->num_leds, pin->pattern, pin->colors);
+}
 
 void ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
   if (argName == "function") {
     pin->function = argValue.toInt();
+    // TODO: Switch on function
   } else if (argName == "num_leds") {
     pin->num_leds = argValue.toInt();
+    UpdateLedStrip(pin);
   } else if (argName == "pattern") {
     pin->pattern = argValue.toInt();
-  } else {
-    Serial.print("Match not found for:");
+    UpdateLedStrip(pin);
+  } else if (argName == "color0") {
+    // Thanks Michael! https://stackoverflow.com/a/3409211/931280
+    /* WARNING: no sanitization or error-checking whatsoever */
+    
+    int pos = 0;
+    for (int count = 0; count < 3; count++) {
+      // 1 = Skip the "#" symbol
+      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
+      pos += 2;
+    }
+    UpdateLedStrip(pin);
+    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
+  }
+    else {
+    Serial.print("Match not found for: ");
     Serial.println(argName);
   }
 }
-
-
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -126,11 +146,9 @@ void setup() {
   /* You can remove the password parameter if you want the AP to be open. */
   WiFi.softAP(SSID);
 
-  // Don't let wifi go to sleep when wifi is on
-  // So far don't need it as response time of ~1s is fine
-  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
-
-  //Serial.setDebugOutput(true);
+  for (int i = 0; i < NUM_PINS; i++) {
+    cache.pins[i].index = i;
+  }
 
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
@@ -142,10 +160,11 @@ void setup() {
   server.on("/", handleRoot);
   
   server.on("/set", HTTP_GET, []() {
-    // Very simple parsing for now. String for name and uint32 for value
-    pin = server.argName(0).toInt();
+    // Very simple parsing for now
+    pin = server.arg(0).toInt();
+    Serial.println(pin);
     for (int i = 1; i < server.args(); i++) {
-      ParsePinArg(&pins[pin], server.argName(i), server.arg(i));
+      ParsePinArg(&(cache.pins[pin]), server.argName(i), server.arg(i));
     }
     server.send(200);
   });

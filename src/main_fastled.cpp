@@ -3,6 +3,7 @@
 #include <FastLED.h>
 
 #include "main_fastled.h"
+#include "main.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -22,13 +23,13 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define TOTAL_NUM_LEDS    300 // just picking a number
-#define NUM_STRIPS 8
-uint32 patterns[NUM_STRIPS];
-uint32 offsets[NUM_STRIPS];
-uint32 lengths[NUM_STRIPS];
+uint32 patterns[NUM_PINS];
+uint32 offsets[NUM_PINS];
+uint32 lengths[NUM_PINS];
+CRGB colors[NUM_PINS][NUM_COLORS];
 CRGB leds[TOTAL_NUM_LEDS];
 
-#define INITIAL_NUM_LEDS TOTAL_NUM_LEDS / NUM_STRIPS
+#define INITIAL_NUM_LEDS TOTAL_NUM_LEDS / NUM_PINS
 
 
 #define BRIGHTNESS         255 // can be dynamically changed though
@@ -153,7 +154,7 @@ void RecomputeOffsets() {
   uint i = 0;
   // Recompute offsets
   offsets[0] = 0;
-  for (i = 1; i < NUM_STRIPS; i++) {
+  for (i = 1; i < NUM_PINS; i++) {
     offsets[i] = offsets[i-1] + lengths[i-1];
   }
 } 
@@ -166,14 +167,19 @@ void SetLedStripParameters() {
   uint i = 0;
 	while(pCur) {
     pCur->setLeds(leds + offsets[i], lengths[i]);
+    fadeToBlackBy(leds + offsets[i], lengths[i], 1);
     i++;
 		pCur = pCur->next();
 	}
+  
+  
 }
 
-void ModifyLedStrip(int pin, int length, int pattern) {
+void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[5]) {
   lengths[pin] = length;
   patterns[pin] = pattern;
+  RecomputeOffsets();
+  SetLedStripParameters();
 }
 
 void AddNewLedStrip(int pin, int offset, int length) {
@@ -216,11 +222,11 @@ void setup_FastLED() {
 
   // Todo: LOAD VALUES FROM EEPROM
   // And save them when changed without wearing out eeprom during testing.
-  for (i = 0; i < NUM_STRIPS; i++) {
+  for (i = 0; i < NUM_PINS; i++) {
     lengths[i] = INITIAL_NUM_LEDS;
   }
   RecomputeOffsets();
-  for (i = 0; i < NUM_STRIPS; i++) {
+  for (i = 0; i < NUM_PINS; i++) {
     AddNewLedStrip(i, offsets[i], lengths[i]);
     patterns[i] = i % ARRAY_SIZE( gPatterns);
   }  
@@ -233,7 +239,7 @@ void loop_FastLED()
 {
   int i = 0;
 
-  for (i = 0; i < NUM_STRIPS; i++) {
+  for (i = 0; i < NUM_PINS; i++) {
     // Call the current pattern function once, updating the 'leds' array
     gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
   }
@@ -253,14 +259,14 @@ void loop_FastLED()
     fadeToBlackBy( leds, TOTAL_NUM_LEDS, 255);
     FastLED.show();
 
-    for (i = 0; i < NUM_STRIPS; i++) {
+    for (i = 0; i < NUM_PINS; i++) {
       lengths[i] = (lengths[i] + 1)%TEMP_NUM_LEDS;
     }
     RecomputeOffsets();
 
     // No performance difference between addLeds and setLeds, surprisingly
     // And no additional entries on linked list
-    for (i = 0; i < NUM_STRIPS; i++) {
+    for (i = 0; i < NUM_PINS; i++) {
       //AddNewLedStrip(i, offsets[i], lengths[i]);
     }
     SetLedStripParameters();

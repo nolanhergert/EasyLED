@@ -7,6 +7,7 @@ controllable without opening hot glue case?
 
 Allow to set wifi credentials and whether to connect to a home wifi instead.
 
+Would like led selection to be text box with plus / minus?
 
 
 Website:

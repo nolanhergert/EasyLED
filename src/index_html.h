@@ -7,7 +7,6 @@
 // https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html
 const char INDEX_HTML[] PROGMEM = R"=====(
 
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -61,6 +60,10 @@ const char INDEX_HTML[] PROGMEM = R"=====(
   float: left;
 }
 
+/* Not seen by default */
+.customizer {
+  display: none;
+}
 
 </style>
 
@@ -99,10 +102,6 @@ const char INDEX_HTML[] PROGMEM = R"=====(
   </div>  
 </div>
 
-<div class="slidecontainer">
-    Global Brightness??!:
-    <input type="range" min="1" max="255" value="50" class="slider" name="brightness" >
-  </div>
 
 <label>Choose a function:
   <select name="function">
@@ -115,9 +114,9 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 
 <!-- HTML classes for customizing patterns chosen -->
 <div class="customizer" id="AnimationCustomizer">
-    <label for="num_leds">Number Of Leds:</label>
-    <input type="text" name="num_leds" required size="10" placeholder="40">
-
+  <div class="slidecontainer">Number of LEDs:
+    <input type="range" min="1" max="60" value="20" class="slider" name="num_leds">
+  </div>
     <p></p>
 
 	<label>Pattern: 
@@ -130,8 +129,8 @@ const char INDEX_HTML[] PROGMEM = R"=====(
 	</label>
 
     <p></p>
-	<label for="favcolor">Select your favorite color:</label>
-	<input type="color" id="favcolor" name="favcolor" value="#ff0000">
+	<label for="color1">Select your favorite color:</label>
+	<input type="color" id="color1" name="color1" value="#ff0000">
 
 </div>
 
@@ -187,16 +186,17 @@ class AnimationCustomizer {
   }
   
   publish() {
-  // Send 
-	// Return a string with the inputs in query string form
+    // Unused right now
+    /*
+    // Send a string with the inputs in query string form
     console.log("pin", currentPin);
     console.log("function", currentFunction);
-	for (let input of this.inputs) {
-	  console.log(input.name, input.value);
-	  
-      //fetch(`/set?brightness=${this.value}`);
-	}
+    for (let input of this.inputs) {
+      console.log(input.name, input.value);
+	  }
+    */
   }
+  
 }
 
 class CombineCustomizer extends AnimationCustomizer {
@@ -207,12 +207,8 @@ class CombineCustomizer extends AnimationCustomizer {
 }
 
 
-
-
-
 // Set up defaults
-// Load already saved data from wemos d1 mini
-
+// TODO: Load already saved data from wemos d1 mini
 
 var customizers = [];
 var animationCustomizer = new AnimationCustomizer();//.setup();
@@ -240,19 +236,15 @@ document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
 
 
 function onCustomizerInput(e) {
-  // Unfortunately seems we can't have a div/class-specific oninput handler for elements
-  // inside the div/class, so let's 
-  // be clear that it's a global handler for the inputs in the customizer classes
   // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
-  // But we're just going to publish the currently active customizer
-  activeCustomizer.publish();
+  // Publish current pin and property
+  fetch(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
 
+  // Alternatively one could also publish all details of the
+  // currently active customizer
+  //activeCustomizer.publish();
 } 
 
-
-
-
-	
 
 // Selector on change
 const selectElement = document.querySelector('.pattern');
@@ -279,8 +271,6 @@ document.getElementsByName("function")[0].addEventListener('change', (event) => 
 
 Can't do without setting the size to be non-0 or non-1 and annoying! I think it's fine for mobile users
 
-
-
 // Thanks Mozilla Dev! https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event
 function onPatternMouseOver(e) {
   // Need to set the current pattern
@@ -299,12 +289,9 @@ document.getElementsByName("pattern")[0].onmouseover = onPatternMouseOver;
 
 */
 
-
-
 </script>
 </body>
 </html>
-
 
 
 )=====";
