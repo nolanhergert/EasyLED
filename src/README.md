@@ -20,6 +20,14 @@ Also try to make the ESP8266 set up so android/others don't complain about not h
 
 
 === Notes ===
+== Number Pickers ==
+https://www.jqueryscript.net/blog/best-number-input-spinner.html#:~:text=Simple%20Number%20Spinner%20Input%20Plugin,the%20'%2B'%20or%20'%2D'%20buttons.
+
+Going to roll my own (simple) one though.
+== DNS ==
+Works great on everything except Android. Waiting for this issue to get resolved: https://issuetracker.google.com/issues/140786115
+
+I guess I can keep "easyled.local" set up though. Not so bad. For Android it'll stay as an IP address, 192.168.4.1 works fine.
 == WLED Patterns ==
 Described here: https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes, and copied to FX.h and FX.cpp
 == Wifi Management ==

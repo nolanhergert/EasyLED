@@ -22,18 +22,19 @@ FASTLED_USING_NAMESPACE
 
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-#define TOTAL_NUM_LEDS    300 // just picking a number
+#define INITIAL_NUM_LEDS 25
+#define TOTAL_NUM_LEDS    NUM_PINS*INITIAL_NUM_LEDS 
 uint32 patterns[NUM_PINS];
 uint32 offsets[NUM_PINS];
 uint32 lengths[NUM_PINS];
 CRGB colors[NUM_PINS][NUM_COLORS];
 CRGB leds[TOTAL_NUM_LEDS];
 
-#define INITIAL_NUM_LEDS TOTAL_NUM_LEDS / NUM_PINS
 
 
-#define BRIGHTNESS         255 // can be dynamically changed though
-#define FRAMES_PER_SECOND  120
+
+#define BRIGHTNESS         64 // can be dynamically changed though
+#define FRAMES_PER_SECOND  200
 
 
 
@@ -139,7 +140,7 @@ void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
-SimplePatternList gPatterns = { color, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
+SimplePatternList gPatterns = { rainbow, color, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -213,7 +214,11 @@ void AddNewLedStrip(int pin, int offset, int length) {
 void setup_FastLED() {
 
   int i = 0;
-  delay(1000); // 1 second delay for recovery
+
+  // Maybe want to use this?! Make sure it's over the combination of all strips
+  // Or just do it manually with patterns you know already? Not sure why, just lower
+  // the brightness as you go...
+  //FastLED.setMaxPowerInVoltsAndMilliamps(4, 1000);
 
   
   
@@ -241,17 +246,14 @@ void loop_FastLED()
 
   for (i = 0; i < NUM_PINS; i++) {
     // Call the current pattern function once, updating the 'leds' array
-    gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
+    gPatterns[patterns[i] % ARRAY_SIZE( gPatterns)](&leds[offsets[i]], lengths[i]);
   }
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
-  // insert a delay to keep the framerate modest
+  // insert a delay (if needed) to keep the framerate modest
   FastLED.delay(1000/FRAMES_PER_SECOND); 
-
-  // do some periodic updates
-  EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
-  //EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+  gHue++;
 /*
 
   EVERY_N_MILLISECONDS( 5 ) {

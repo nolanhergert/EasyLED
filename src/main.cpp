@@ -141,7 +141,7 @@ void handleNotFound(){
 
 uint8 pin = 0;
 void setup() {
-  delay(500);
+  delay(50);
   Serial.begin(115200);
   Serial.println();
   Serial.print("Configuring access point...");
@@ -161,19 +161,8 @@ void setup() {
   //   the fully-qualified domain name is "esp8266.local"
   // - second argument is the IP address to advertise
   //   we send our IP address on the WiFi network
-  if (!MDNS.begin("esp8266")) {
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
+  MDNS.begin("easyled");
   Serial.println("mDNS responder started");
-
-
-
-
-
-
 
 
   // Allow http updates
