@@ -48,6 +48,8 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 
+#include <ESP8266mDNS.h>
+
 #include <iostream>
 #include <map>
 #include <string>
@@ -154,6 +156,26 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(myIP);
 
+    // Set up mDNS responder:
+  // - first argument is the domain name, in this example
+  //   the fully-qualified domain name is "esp8266.local"
+  // - second argument is the IP address to advertise
+  //   we send our IP address on the WiFi network
+  if (!MDNS.begin("esp8266")) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+
+
+
+
+
+
+
+
   // Allow http updates
   httpUpdater.setup(&server);
 
@@ -175,6 +197,9 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
+    // Add service to MDNS-SD
+  MDNS.addService("http", "tcp", 80);
+
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
@@ -186,6 +211,7 @@ uint16 b = 0;
 int8 inc = 1;
 void loop() {
   server.handleClient();
+  MDNS.update();
   loop_FastLED();
 
 /*
