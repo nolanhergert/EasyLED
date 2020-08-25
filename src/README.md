@@ -20,6 +20,8 @@ Also try to make the ESP8266 set up so android/others don't complain about not h
 
 
 === Notes ===
+== WLED Patterns ==
+Described here: https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes, and copied to FX.h and FX.cpp
 == Wifi Management ==
 Might want to use this pre-done thing instead: https://github.com/rjwats/esp8266-react
   * Allow to set wifi credentials and whether to connect to a home wifi instead.
