@@ -86,6 +86,10 @@ void UpdateLedStrip(EasyLEDPin *pin) {
 }
 
 void ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
+  Serial.print("Parsing: ");
+  Serial.print(argName);
+  Serial.print(", ");
+  Serial.println(argValue);
   if (argName == "function") {
     pin->function = argValue.toInt();
     // TODO: Switch on function
@@ -107,8 +111,7 @@ void ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
     }
     UpdateLedStrip(pin);
     //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
-  }
-    else {
+  } else {
     Serial.print("Match not found for: ");
     Serial.println(argName);
   }
@@ -174,10 +177,18 @@ void setup() {
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now
-    pin = server.arg(0).toInt();
-    Serial.println(pin);
-    for (int i = 1; i < server.args(); i++) {
-      ParsePinArg(&(cache.pins[pin]), server.argName(i), server.arg(i));
+    if (server.argName(0) == "brightness") {
+      FastLED.setBrightness(server.arg(0).toInt());
+    } else if (server.argName(0) == "pin") {
+      // Pins start at 0 offset in the pin table
+      pin = server.arg(0).toInt() - 1;
+      Serial.println(pin);
+      for (int i = 1; i < server.args(); i++) {
+        ParsePinArg(&(cache.pins[pin]), server.argName(i), server.arg(i));
+      }
+    } else {
+      Serial.print("Invalid argument: ");
+      Serial.println(server.argName(0));
     }
     server.send(200);
   });

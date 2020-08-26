@@ -83,7 +83,7 @@
 <h1>Hello world 4!</h1>
 
 <div class="slidecontainer">Brightness: 
-  <input type="range" min="0" max="255" value="65" step="5" class="slider" name="brightness">
+  <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness" name="brightness">
 </div>
 
 <div class="radio-toolbar">
@@ -143,10 +143,14 @@
 
 	<label>Pattern: 
 	  <select name="pattern">
-		<option value="0">Color</option>
-		<option value="1">Fill Noise</option>
-		<option value="2">Juggle</option>
-		<option value="3">Rainbow</option>
+    <option value="0">Rainbow</option>
+    <option value="1">Rainbow With Glitter</option>
+		<option value="2">Color</option>
+    <option value="3">Fill Noise</option>
+    <option value="4">Juggle</option>
+    <option value="5">Confetti</option>
+    <option value="6">Sinelon</option>
+    <option value="7">BPM</option>
 	  </select>
 	</label>
 
@@ -181,7 +185,7 @@
 
 <script>
 
-document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
+//document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
 /*
 var number_pickers = document.getElementsByClassName('number-picker');
 //var number_pickers = document.querySelector('#number-picker');
@@ -190,6 +194,13 @@ var number_pickers = document.getElementsByClassName('number-picker');
   p.getElementsByClassName('increment')[0].onclick = p.getElementsByClassName('value')[0]++;
 });
 */
+
+document.getElementById("brightness").oninput = onGeneralInput;
+
+
+// TODO is the constructor occurring correctly?? Seems to only be 
+// happening for one customizer and not iterating over all of them?
+// Should probably be using class too
 
 class AnimationCustomizer {
   constructor() {
@@ -265,7 +276,6 @@ function onPinSelection(e) {
 // Set pin handler
 document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
 
-
 function onCustomizerInput(e) {
   // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
   // Publish current pin and property
@@ -275,6 +285,13 @@ function onCustomizerInput(e) {
   // currently active customizer
   //activeCustomizer.publish();
 } 
+
+// Probably want to refactor this and the above to be together
+function onGeneralInput(e) {
+  fetch(`/set?${e.target.name}=${e.target.value}`);
+}
+
+
 
 
 // Selector on change

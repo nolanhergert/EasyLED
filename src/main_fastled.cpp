@@ -37,9 +37,6 @@ CRGB leds[TOTAL_NUM_LEDS];
 #define FRAMES_PER_SECOND  200
 
 
-
-
-uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
   
 void rainbow(CRGB LedsSubset[], uint32 LedsSubsetCount) {
@@ -140,15 +137,9 @@ void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
-SimplePatternList gPatterns = { rainbow, color, fillnoise8, juggle, rainbow, rainbowWithGlitter, confetti, sinelon, bpm };
+SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, color, fillnoise8, juggle, confetti, sinelon, bpm };
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-
-void nextPattern()
-{
-  // add one to the current pattern number, and wrap around at the end
-  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
-}
 
 
 void RecomputeOffsets() {
@@ -177,7 +168,13 @@ void SetLedStripParameters() {
 }
 
 void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[5]) {
-  lengths[pin] = length;
+  // Don't change lengths just yet, need to load in
+  // saved values
+  //lengths[pin] = length;
+  Serial.print("Changing pin ");
+  Serial.print(pin);
+  Serial.print(" pattern to: ");
+  Serial.println(pattern);
   patterns[pin] = pattern;
   RecomputeOffsets();
   SetLedStripParameters();
@@ -246,7 +243,7 @@ void loop_FastLED()
 
   for (i = 0; i < NUM_PINS; i++) {
     // Call the current pattern function once, updating the 'leds' array
-    gPatterns[patterns[i] % ARRAY_SIZE( gPatterns)](&leds[offsets[i]], lengths[i]);
+    gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
   }
 
   // send the 'leds' array out to the actual LED strip
