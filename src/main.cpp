@@ -36,10 +36,8 @@
 // Thanks Bitluni!
 // https://github.com/bitluni/bitluniHomeAutomation/
 
-#include "index_html.h"
-#include "main_fastled.h"
 
-#include <main.h>
+
 #include <FastLED.h>
 
 #include <Arduino.h>
@@ -53,6 +51,10 @@
 #include <iostream>
 #include <map>
 #include <string>
+
+#include "index.html.h"
+#include "main_fastled.h"
+#include "main.h"
 
 #define SSID "EasyLED"
 // No password for now
