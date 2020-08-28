@@ -26,7 +26,6 @@ Would like led selection to be text box with plus / minus?
 
 
 Website:
-  * Should some kind of auto-generation if needed for the build process to save copy/pasting work. However, should be able to do the same process/page for each strip.
   * Am I running out of RAM? If so, load <static> website from PROGMEM (flash) https://arduino-esp8266.readthedocs.io/en/latest/PROGMEM.html. See how slow this is?  To speed things up, maybe allow caching but need to play with etags to invalidate cache on new page update?
 
 === Some remaining easy ===

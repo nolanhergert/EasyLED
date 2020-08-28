@@ -33,7 +33,7 @@ CRGB leds[TOTAL_NUM_LEDS];
 
 
 
-#define BRIGHTNESS         64 // can be dynamically changed though
+#define DEFAULT_BRIGHTNESS (uint8)64 // can be dynamically changed though
 #define FRAMES_PER_SECOND  200
 
 
@@ -159,7 +159,6 @@ void SetLedStripParameters() {
   uint i = 0;
 	while(pCur) {
     pCur->setLeds(leds + offsets[i], lengths[i]);
-    fadeToBlackBy(leds + offsets[i], lengths[i], 1);
     i++;
 		pCur = pCur->next();
 	}
@@ -205,7 +204,8 @@ void AddNewLedStrip(int pin, int offset, int length) {
   }
 }
 
-
+uint8 initialStartupBrightness = 0;
+uint8 initialStartupBrightnessMax = DEFAULT_BRIGHTNESS;
 
 //static const 
 void setup_FastLED() {
@@ -220,9 +220,10 @@ void setup_FastLED() {
   
   
   // set master brightness control
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(initialStartupBrightness);
 
   // Todo: LOAD VALUES FROM EEPROM
+  //  * initialStartupBrightnessMax
   // And save them when changed without wearing out eeprom during testing.
   for (i = 0; i < NUM_PINS; i++) {
     lengths[i] = INITIAL_NUM_LEDS;
@@ -240,6 +241,13 @@ void setup_FastLED() {
 void loop_FastLED()
 {
   int i = 0;
+
+  // Fade in on startup. Gotta do it :)
+  EVERY_N_MILLISECONDS( 50 ) {
+    if (initialStartupBrightness < initialStartupBrightnessMax) {
+      FastLED.setBrightness(initialStartupBrightness++);
+    }
+  }
 
   for (i = 0; i < NUM_PINS; i++) {
     // Call the current pattern function once, updating the 'leds' array

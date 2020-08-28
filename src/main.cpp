@@ -126,7 +126,7 @@ ESP8266HTTPUpdateServer httpUpdater;
 
 
 void handleRoot() {
-  server.send(200, "text/html", INDEX_HTML);
+  server.send_P(200, "text/html", INDEX_HTML);
 }
 
 void handleNotFound(){
@@ -146,7 +146,6 @@ void handleNotFound(){
 
 uint8 pin = 0;
 void setup() {
-  delay(50);
   Serial.begin(115200);
   Serial.println();
   Serial.print("Configuring access point...");
