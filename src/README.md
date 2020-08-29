@@ -5,12 +5,19 @@ Minimum Viable Product
   * Save preferences across power cycle and firmware update
      * Setting one value (say pattern) doesn't change other values in pin struct. The whole pin struct is sent in to FastLED updater. Need to remove comment in that updater
      that prevents length from getting updated
+     * Maybe can just use eeprom rotate, don't need the full flashee script.
   * Select preferred colors and have them expressed in patterns?
   * Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
     * Coat pin ends with hot glue until ready to use?
     * Can hold down cables to board with hot glue
     * How to make mold that is 
 
+Somehow wled.me works on android?
+
+=== "Good" Patterns from WLED ===
+  * Biking (alerting, speed, motion): Chase, colorwaves?, Lighthouse, heartbeat (not accurate though), meteor!, noise 2 and 4?, Pride 2015, Running, Scanner / Scanner Dual, 
+  * Indoors? Sweep, rain, Twinklefox
+  * 
 
 
 Make it easy to program an external button to do an action? (was thinking of horn)
