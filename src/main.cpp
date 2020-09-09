@@ -56,29 +56,12 @@
 #include "main_fastled.h"
 #include "main.h"
 
+#include <EEPROM.h>
+
 #define SSID "EasyLED"
 // No password for now
 
-
-typedef struct {
-  uint8 index;
-  uint8 function;
-  uint16 pattern;
-  uint16 num_leds;
-  uint16 offset;
-  // In decreasing importance
-  CRGB colors[NUM_COLORS]; // rgb
-
-  //128B total?
-  uint8 reserved[100];
-} EasyLEDPin;
-
-struct Cache {
-  uint16 version;
-  EasyLEDPin pins[8];
-};
-
-Cache cache;
+Settings settings;
 
 
 void UpdateLedStrip(EasyLEDPin *pin) {
@@ -152,6 +135,8 @@ void setup() {
   /* You can remove the password parameter if you want the AP to be open. */
   WiFi.softAP(SSID);
 
+  settings.init();
+
   for (int i = 0; i < NUM_PINS; i++) {
     cache.pins[i].index = i;
   }
@@ -178,6 +163,8 @@ void setup() {
     // Very simple parsing for now
     if (server.argName(0) == "brightness") {
       FastLED.setBrightness(server.arg(0).toInt());
+    } else if (server.argName(0) == "save") {
+      WriteToEEPROM();
     } else if (server.argName(0) == "pin") {
       // Pins start at 0 offset in the pin table
       pin = server.arg(0).toInt() - 1;
@@ -205,6 +192,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   setup_FastLED();
+
   
 }
 

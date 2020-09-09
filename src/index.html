@@ -7,7 +7,9 @@
 
 <style>
 
-
+body {
+  width: 400px;
+}
 
 .radio-toolbar {
   margin: 10px;
@@ -74,6 +76,11 @@
 .number-picker input[type=number] {
   -moz-appearance: textfield;
 }
+
+#save {
+  float: right;
+  font-size: large;
+}
 /*****************************************/
 
 </style>
@@ -81,9 +88,13 @@
 </head>
 <body>
 
-<div class="slidecontainer">Brightness: 
+<div>
+  Brightness: 
   <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness" name="brightness">
+  <button type="button" id="save">Save Changes</button>
 </div>
+
+
 
 <div class="radio-toolbar">
   Pin

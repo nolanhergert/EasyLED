@@ -10,7 +10,8 @@ Minimum Viable Product
   * Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
     * Coat pin ends with hot glue until ready to use?
     * Can hold down cables to board with hot glue
-    * How to make mold that is 
+    * How to make mold that is reusable
+  * Wifi turns off after N (60?) seconds if unused for security? If you have 
 
 Somehow wled.me works on android?
 
