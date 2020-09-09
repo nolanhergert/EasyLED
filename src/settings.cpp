@@ -22,6 +22,7 @@ void setup_settings() {
 }
 
 
+// Reference this: https://arduino-esp8266.readthedocs.io/en/latest/libraries.html#eeprom
 bool WriteToEEPROM() {
   bool success = false;
   int i = 0;
