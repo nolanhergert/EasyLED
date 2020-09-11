@@ -54,14 +54,16 @@
 
 #include "index.html.h"
 #include "main_fastled.h"
-#include "main.h"
+#include "settings.h"
+#include "common.h"
 
 #include <EEPROM.h>
 
 #define SSID "EasyLED"
 // No password for now
 
-Settings settings;
+
+struct Settings settings;
 
 
 void UpdateLedStrip(EasyLEDPin *pin) {
@@ -131,14 +133,15 @@ uint8 pin = 0;
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  // Read in initial settings
+  settings.read();
   Serial.print("Configuring access point...");
   /* You can remove the password parameter if you want the AP to be open. */
   WiFi.softAP(SSID);
 
-  settings.init();
 
   for (int i = 0; i < NUM_PINS; i++) {
-    cache.pins[i].index = i;
+    settings.pins[i].index = i;
   }
 
   IPAddress myIP = WiFi.softAPIP();
@@ -164,13 +167,16 @@ void setup() {
     if (server.argName(0) == "brightness") {
       FastLED.setBrightness(server.arg(0).toInt());
     } else if (server.argName(0) == "save") {
-      WriteToEEPROM();
+      if (RC_FAILURE == settings.write()) {
+        // Return an error to server?!
+        Serial.println("Unsuccessful in writing to eeprom");
+      }
     } else if (server.argName(0) == "pin") {
       // Pins start at 0 offset in the pin table
       pin = server.arg(0).toInt() - 1;
       Serial.println(pin);
       for (int i = 1; i < server.args(); i++) {
-        ParsePinArg(&(cache.pins[pin]), server.argName(i), server.arg(i));
+        ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
       }
     } else {
       Serial.print("Invalid argument: ");

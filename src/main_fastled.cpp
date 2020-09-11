@@ -3,7 +3,7 @@
 #include <FastLED.h>
 
 #include "main_fastled.h"
-#include "main.h"
+#include "settings.h"
 
 FASTLED_USING_NAMESPACE
 

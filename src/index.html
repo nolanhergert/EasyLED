@@ -90,8 +90,8 @@ body {
 
 <div>
   Brightness: 
-  <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness" name="brightness">
-  <button type="button" id="save">Save Changes</button>
+  <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness">
+  <button type="button" id="save" value="1" disabled="true">Save Changes</button>
 </div>
 
 
@@ -206,7 +206,9 @@ var number_pickers = document.getElementsByClassName('number-picker');
 });
 */
 
+// General non-customizer inputs
 document.getElementById("brightness").oninput = onGeneralInput;
+document.getElementById("save").onclick = onGeneralInput;
 
 
 // TODO is the constructor occurring correctly?? Seems to only be 
@@ -291,6 +293,8 @@ function onCustomizerInput(e) {
   // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
   // Publish current pin and property
   fetch(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
+  //console.log(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
+  
 
   // Alternatively one could also publish all details of the
   // currently active customizer
@@ -299,7 +303,8 @@ function onCustomizerInput(e) {
 
 // Probably want to refactor this and the above to be together
 function onGeneralInput(e) {
-  fetch(`/set?${e.target.name}=${e.target.value}`);
+  fetch(`/set?${e.target.id}=${e.target.value}`);
+  //console.log(`/set?${e.target.id}=${e.target.value}`);
 }
 
 

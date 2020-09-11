@@ -52,6 +52,8 @@ Works great on everything except Android. Waiting for this issue to get resolved
 I guess I can keep "easyled.local" set up though. Not so bad. For Android it'll stay as an IP address, 192.168.4.1 works fine.
 == WLED Patterns ==
 Described here: https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes, and copied to FX.h and FX.cpp
+== C++ Help ==
+Great: https://www.learncpp.com/
 == Wifi Management ==
 Might want to use this pre-done thing instead: https://github.com/rjwats/esp8266-react
   * Allow to set wifi credentials and whether to connect to a home wifi instead.
