@@ -12,6 +12,7 @@ Minimum Viable Product
     * Can hold down cables to board with hot glue
     * How to make mold that is reusable
   * Wifi turns off after N (60?) seconds if unused for security? If you have 
+  * 4-strip version can have half the resin / board size? Should be much smaller...nice!
 
 Somehow wled.me works on android?
 

@@ -5,6 +5,41 @@
 #include "common.h"
 
 
+// Move 
+/*
+void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
+  Serial.print("Parsing: ");
+  Serial.print(argName);
+  Serial.print(", ");
+  Serial.println(argValue);
+  if (argName == "function") {
+    pin->function = argValue.toInt();
+    // TODO: Switch on function
+  } else if (argName == "num_leds") {
+    pin->num_leds = argValue.toInt();
+    UpdateLedStrip(pin);
+  } else if (argName == "pattern") {
+    pin->pattern = argValue.toInt();
+    UpdateLedStrip(pin);
+  } else if (argName == "color0") {
+    // Thanks Michael! https://stackoverflow.com/a/3409211/931280
+    /* WARNING: no sanitization or error-checking whatsoever */
+    
+    int pos = 0;
+    for (int count = 0; count < 3; count++) {
+      // 1 = Skip the "#" symbol
+      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
+      pos += 2;
+    }
+    UpdateLedStrip(pin);
+    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
+  } else {
+    Serial.print("Match not found for: ");
+    Serial.println(argName);
+  }
+}
+*/
+
 void Settings::setDefaults() {
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};

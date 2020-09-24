@@ -82,7 +82,7 @@ typedef struct  {
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
 
 #define NUM_COLORS 5
-typedef struct {
+struct EasyLEDPin {
   uint8 index;
   uint8 function;
   uint16 pattern;
@@ -92,8 +92,47 @@ typedef struct {
   CRGB colors[NUM_COLORS]; // rgb
 
   uint8 reserved[EASY_LED_PIN_SIZE - 24];
-} EasyLEDPin;
+/*
+  I think I want to serialize and deserialize to javascript using json. 
+  // See ArduinoJSON: 
+    * https://arduinojson.org/v6/assistant/
+    * https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
+
+  String toJSON();
+  void ParsePinArg(String argName, String argValue);
+  */
+
+};
 _Static_assert(sizeof(EasyLEDPin) == EASY_LED_PIN_SIZE, "");
+
+struct Settings {
+    SettingsGeneral general;
+    EasyLEDPin pins[NUM_PINS];
+    // There's some room yet
+    uint8 reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
+
+    // Default constructor
+    //Settings() {};
+
+    void read() {
+      // Automatically read from eeprom on init
+      IO(SETTINGS_IO_READ);
+    }
+
+    bool write() {
+      return IO(SETTINGS_IO_WRITE);
+    }
+
+    private:
+      // IsWriting:
+      //   FALSE = read
+      //   TRUE = write
+      // Reference: https://arduino-esp8266.readthedocs.io/en/latest/libraries.html#eeprom
+      bool IO(bool IsWriting);
+
+      void setDefaults();
+};
+
 
 
 

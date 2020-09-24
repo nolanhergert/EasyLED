@@ -196,6 +196,27 @@ body {
 
 <script>
 
+
+
+// Get latest data using JSON asyncronous request
+// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
+/*
+
+fetch('products.json').then(function(response) {
+  //return response.json();
+  // Maybe this is helpful? https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON
+  JSON.parse();     // input  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+  JSON.stringify(); // output https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+}).
+
+*/
+
+
+
+
+
+
+
 //document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
 /*
 var number_pickers = document.getElementsByClassName('number-picker');
@@ -205,6 +226,8 @@ var number_pickers = document.getElementsByClassName('number-picker');
   p.getElementsByClassName('increment')[0].onclick = p.getElementsByClassName('value')[0]++;
 });
 */
+
+
 
 // General non-customizer inputs
 document.getElementById("brightness").oninput = onGeneralInput;

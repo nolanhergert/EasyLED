@@ -70,45 +70,10 @@ void UpdateLedStrip(EasyLEDPin *pin) {
   ModifyLedStrip(pin->index, pin->num_leds, pin->pattern, pin->colors);
 }
 
-void ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
-  Serial.print("Parsing: ");
-  Serial.print(argName);
-  Serial.print(", ");
-  Serial.println(argValue);
-  if (argName == "function") {
-    pin->function = argValue.toInt();
-    // TODO: Switch on function
-  } else if (argName == "num_leds") {
-    pin->num_leds = argValue.toInt();
-    UpdateLedStrip(pin);
-  } else if (argName == "pattern") {
-    pin->pattern = argValue.toInt();
-    UpdateLedStrip(pin);
-  } else if (argName == "color0") {
-    // Thanks Michael! https://stackoverflow.com/a/3409211/931280
-    /* WARNING: no sanitization or error-checking whatsoever */
-    
-    int pos = 0;
-    for (int count = 0; count < 3; count++) {
-      // 1 = Skip the "#" symbol
-      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
-      pos += 2;
-    }
-    UpdateLedStrip(pin);
-    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
-  } else {
-    Serial.print("Match not found for: ");
-    Serial.println(argName);
-  }
-}
+
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
-
-/* Just a little test message.  Go to http://192.168.4.1 in a web browser
-   connected to this access point to see it.
-*/
-
 
 void handleRoot() {
   server.send_P(200, "text/html", INDEX_HTML);
@@ -176,7 +141,7 @@ void setup() {
       pin = server.arg(0).toInt() - 1;
       Serial.println(pin);
       for (int i = 1; i < server.args(); i++) {
-        ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
+        //ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
       }
     } else {
       Serial.print("Invalid argument: ");
