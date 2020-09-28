@@ -13,6 +13,7 @@ Minimum Viable Product
     * How to make mold that is reusable
   * Wifi turns off after N (60?) seconds if unused for security? If you have 
   * 4-strip version can have half the resin / board size? Should be much smaller...nice!
+    * Fade LED during operation? Now it's a free pin...D4 I think.
 
 Somehow wled.me works on android?
 
@@ -36,6 +37,10 @@ Would like led selection to be text box with plus / minus?
 
 Website:
   * Am I running out of RAM? If so, load <static> website from PROGMEM (flash) https://arduino-esp8266.readthedocs.io/en/latest/PROGMEM.html. See how slow this is?  To speed things up, maybe allow caching but need to play with etags to invalidate cache on new page update?
+
+=== Speed ===
+Not needed since there's only one client at a time. But kinda cool and might have some useful features like chunked response. Async web server: https://github.com/me-no-dev/ESPAsyncWebServer#arduinojson-basic-response
+
 
 === Some remaining easy ===
 Also try to make the ESP8266 set up so android/others don't complain about not having web access and boot you off the network when on home wifi.

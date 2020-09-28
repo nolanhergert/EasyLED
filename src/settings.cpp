@@ -5,6 +5,28 @@
 #include "common.h"
 
 
+/*
+// Very stack inefficient probably? Not sure...
+// Probably want to do something like this: https://github.com/bblanchon/ArduinoJson/issues/166
+String createJsonResponse() {
+  StaticJsonBuffer<500> jsonBuffer;
+
+  JsonObject &root = jsonBuffer.createObject();
+  JsonArray &tempValues = root.createNestedArray("temperature");
+  tempValues.add(t);
+  JsonArray &humiValues = root.createNestedArray("humidity");
+  humiValues.add(h);
+  JsonArray &dewpValues = root.createNestedArray("dewpoint");
+  dewpValues.add(pfDew);
+  JsonArray &EsPvValues = root.createNestedArray("systemv");
+  EsPvValues.add(pfVcc / 1000, 3);
+
+  String json;
+  root.prettyPrintTo(json);
+  return json;
+}
+*/
+
 // Move 
 /*
 void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
@@ -23,7 +45,7 @@ void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
     UpdateLedStrip(pin);
   } else if (argName == "color0") {
     // Thanks Michael! https://stackoverflow.com/a/3409211/931280
-    /* WARNING: no sanitization or error-checking whatsoever */
+    / WARNING: no sanitization or error-checking whatsoever
     
     int pos = 0;
     for (int count = 0; count < 3; count++) {
@@ -43,7 +65,12 @@ void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
 void Settings::setDefaults() {
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
-  general.write_count = 0;
+  general.writeCount = 0;
+  general.numPins = NUM_PINS;
+  
+  for (int i = 0; i < general.numPins; i++) {
+    pins[i].index = i;
+  }
 }
 
 // IsWriting:
@@ -73,11 +100,11 @@ bool Settings::IO(bool IsWriting) {
   Serial.print(".");
   Serial.println(general.version.minor);
   Serial.print("Write count: ");
-  Serial.println(general.write_count);
+  Serial.println(general.writeCount);
   
 
   if (IsWriting) {
-    general.write_count++;
+    general.writeCount++;
   }
 
   // Check CRC

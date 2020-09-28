@@ -64,6 +64,11 @@
 
 
 struct Settings settings;
+// Don't need to be future compatible, since we're also serving 
+// that the user is interacting with.... is that logic right?
+// So we can use a StaticJsonDocument on the stack
+// Stack size is 4K, so need to use heap
+//DynamicJsonDocument<SettingsJsonCapacity> doc;
 
 
 void UpdateLedStrip(EasyLEDPin *pin) {
@@ -74,10 +79,6 @@ void UpdateLedStrip(EasyLEDPin *pin) {
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
-
-void handleRoot() {
-  server.send_P(200, "text/html", INDEX_HTML);
-}
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -105,10 +106,6 @@ void setup() {
   WiFi.softAP(SSID);
 
 
-  for (int i = 0; i < NUM_PINS; i++) {
-    settings.pins[i].index = i;
-  }
-
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
@@ -125,7 +122,37 @@ void setup() {
   // Allow http updates
   httpUpdater.setup(&server);
 
-  server.on("/", handleRoot);
+  server.on("/", []() {
+    // Send the static webpage generated from index.html
+    // and stored in flash
+    server.send_P(200, "text/html", INDEX_HTML);
+  });
+
+  server.on("/get", []() {
+    // Send a JSON file of our current settings
+    //server.send(200, "text/json", createJsonResponse());
+  });
+
+  // Using PATCH so we can be RESTful and be clear that we don't want to
+  // add new instances on the server or whatever. Want to be able to send
+  // a partial and full update of settings
+  server.on("/body", HTTP_PATCH, []() {
+    //server.
+    //DeserializationError err = deserializeJson(doc, input);
+          if (server.hasArg("plain")== false){ //Check if body received
+ 
+            server.send(200, "text/plain", "Body not received");
+            return;
+ 
+      }
+ 
+      String message = "Body received:\n";
+             message += server.arg("plain");
+             message += "\n";u
+ 
+      server.send(200, "text/plain", message);
+      Serial.println(message);
+  });
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now

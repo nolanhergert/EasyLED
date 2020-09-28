@@ -5,6 +5,7 @@
 #include <c_types.h>
 #include <FastLED.h>
 #include <inttypes.h>
+#include <ArduinoJson.h>
 
 ////////////////////////////////////////////////////////////////
 // Helpful compile time print if the below assertions fail
@@ -17,6 +18,8 @@
 // Conservative estimate of cheap flash modules
 #define FLASH_PAGE_MAX_WRITE_COUNT 3000
 // Index is 0-7, but pin number on the board and GUI is 1-8
+// Be careful of changing this value! Used in a number of places...
+// TODO: Is it ok to modify this for a resin-cast 4-pin board? Need to reset to defaults correctly...
 #define NUM_PINS 8
 
 // Do not modify this without also providing backwards compatibility with
@@ -72,16 +75,24 @@ struct Version
 	}
 };
 
+#define SETTINGS_GENERAL_BYTE_COUNT 17
 typedef struct  {
   Version version;
-  uint16 write_count;
+  uint16 writeCount;
   uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
+  uint8 numPins; // Always store NUM_PINS in flash, but limit display on GUI to numPins
   // Wifi ID, password, and encryption level?
-  uint8 reserved[SETTINGS_GENERAL_SIZE-16];
+
+  // When adding fields:
+  //   * Increase byte count (SETTINGS_GENERAL_BYTE_COUNT)
+  //   * Increase number of fields in JsonDocument capacity below
+  uint8 reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
 } SettingsGeneral;
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
+const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(3);
 
 #define NUM_COLORS 5
+#define EASY_LED_PIN_BYTE_COUNT 24
 struct EasyLEDPin {
   uint8 index;
   uint8 function;
@@ -90,48 +101,16 @@ struct EasyLEDPin {
   uint16 offset;
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
-
-  uint8 reserved[EASY_LED_PIN_SIZE - 24];
-/*
-  I think I want to serialize and deserialize to javascript using json. 
-  // See ArduinoJSON: 
-    * https://arduinojson.org/v6/assistant/
-    * https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
-
-  String toJSON();
-  void ParsePinArg(String argName, String argValue);
-  */
-
+  // When adding fields:
+  //   * Increase byte count (EASY_LED_PIN_BYTE_COUNT)
+  //   * Increase number of fields in JsonDocument capacity below
+  uint8 reserved[EASY_LED_PIN_SIZE - EASY_LED_PIN_BYTE_COUNT];
 };
 _Static_assert(sizeof(EasyLEDPin) == EASY_LED_PIN_SIZE, "");
-
-struct Settings {
-    SettingsGeneral general;
-    EasyLEDPin pins[NUM_PINS];
-    // There's some room yet
-    uint8 reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
-
-    // Default constructor
-    //Settings() {};
-
-    void read() {
-      // Automatically read from eeprom on init
-      IO(SETTINGS_IO_READ);
-    }
-
-    bool write() {
-      return IO(SETTINGS_IO_WRITE);
-    }
-
-    private:
-      // IsWriting:
-      //   FALSE = read
-      //   TRUE = write
-      // Reference: https://arduino-esp8266.readthedocs.io/en/latest/libraries.html#eeprom
-      bool IO(bool IsWriting);
-
-      void setDefaults();
-};
+// This doesn't technically need to be in the .h file since we aren't exposing it
+// to other files, but it makes adding fields to EasyLEDPin easier
+//                                   Colors                  rest of fields
+const int EasyLEDPinJsonCapacity = 5*JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(5);
 
 
 
@@ -171,6 +150,7 @@ struct Settings {
 // char (*__kaboom)[sizeof(Settings)] = 1;
 // Make sure size is appropriate
 _Static_assert(sizeof(Settings) == FLASH_PAGE_SIZE, "");
+const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + NUM_PINS*EasyLEDPinJsonCapacity;
 
 
 #endif // _SETTINGS_H_
