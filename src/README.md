@@ -7,10 +7,10 @@ Minimum Viable Product
      that prevents length from getting updated
      * Maybe can just use eeprom rotate, don't need the full flashee script.
   * Select preferred colors and have them expressed in patterns?
-  * Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
-    * Coat pin ends with hot glue until ready to use?
-    * Can hold down cables to board with hot glue
-    * How to make mold that is reusable
+  * Show estimated power usage, ideally "how long battery will last". Need to input battery size.
+  * DONE! Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
+    * DONE! Coat pin ends with hot glue until ready to use?
+    * DONE! How to make mold that is reusable
   * Wifi turns off after N (60?) seconds if unused for security? If you have 
 
 Somehow wled.me works on android?
