@@ -64,18 +64,11 @@
 
 
 struct Settings settings;
-// Don't need to be future compatible, since we're also serving 
-// that the user is interacting with.... is that logic right?
-// So we can use a StaticJsonDocument on the stack
-// Stack size is 4K, so need to use heap
-//DynamicJsonDocument<SettingsJsonCapacity> doc;
 
 
 void UpdateLedStrip(EasyLEDPin *pin) {
   ModifyLedStrip(pin->index, pin->num_leds, pin->pattern, pin->colors);
 }
-
-
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -145,13 +138,31 @@ void setup() {
             return;
  
       }
- 
+      String json;
+      settings.serialize(json);
       String message = "Body received:\n";
+             // What the server sent to us as json
              message += server.arg("plain");
-             message += "\n";u
+             message += "\n";
+             message += json;
  
       server.send(200, "text/plain", message);
+
+
+
+
+
+
+
+
+      // TODO: Remove me!
       Serial.println(message);
+
+
+
+
+
+
   });
   
   server.on("/set", HTTP_GET, []() {
@@ -159,7 +170,7 @@ void setup() {
     if (server.argName(0) == "brightness") {
       FastLED.setBrightness(server.arg(0).toInt());
     } else if (server.argName(0) == "save") {
-      if (RC_FAILURE == settings.write()) {
+      if (RC_FAILURE == settings.save()) {
         // Return an error to server?!
         Serial.println("Unsuccessful in writing to eeprom");
       }

@@ -4,28 +4,75 @@
 #include <EEPROM.h>
 #include "common.h"
 
+// #001122 -> CRGB
+CRGB HTMLColorCodeToCRGB(const String& s) {
+  // Thanks Michael! https://stackoverflow.com/a/3409211/931280
+  // WARNING: no sanitization or error-checking whatsoever
+  CRGB c;
+  sscanf(s.c_str(), "#%2hhx%2hhx%2hhx", &c.raw[0], &c.raw[1], &c.raw[2]);
+  return c;
+}
 
-/*
+void CRGBToHtmlColorCode(CRGB c, String& s) {
+  // Thanks Doug! https://stackoverflow.com/a/2342176/931280
+  char temp[8];
+  snprintf(temp, sizeof(temp), "#%02x%02x%02x", c.raw[0], c.raw[1], c.raw[2]);
+  s = temp;
+}
+
+
 // Very stack inefficient probably? Not sure...
 // Probably want to do something like this: https://github.com/bblanchon/ArduinoJson/issues/166
-String createJsonResponse() {
-  StaticJsonBuffer<500> jsonBuffer;
+
+// Don't need to be future compatible, since we're also serving 
+// that the user is interacting with.... is that logic right?
+// So we can use a StaticJsonDocument on the stack
+// Stack size is 4K, so need to use heap
+//DynamicJsonDocument<SettingsJsonCapacity> doc;
+void Settings::serialize(String& s) {
+  /*
+  StaticJsonDocument<500> jsonBuffer;
 
   JsonObject &root = jsonBuffer.createObject();
   JsonArray &tempValues = root.createNestedArray("temperature");
-  tempValues.add(t);
-  JsonArray &humiValues = root.createNestedArray("humidity");
-  humiValues.add(h);
-  JsonArray &dewpValues = root.createNestedArray("dewpoint");
-  dewpValues.add(pfDew);
-  JsonArray &EsPvValues = root.createNestedArray("systemv");
-  EsPvValues.add(pfVcc / 1000, 3);
+  tempValues.add(5);
 
   String json;
-  root.prettyPrintTo(json);
+  serializeJsonPretty(root, json);
   return json;
+  */
+  int i, j = 0;
+  DynamicJsonDocument doc(SettingsJsonCapacity);
+
+
+  // General settings
+  String ver;
+  general.version.toString(general.version, ver);
+  doc["version"] = ver;
+  doc["writeCount"] = general.writeCount;
+  doc["crc"] = general.crc;
+  doc["numPins"] = general.numPins;
+  
+  JsonArray pinsJson = doc.createNestedArray("pins");
+  // Settings for each pin
+  for (i = 0; i < general.numPins; i++) {
+    JsonObject pin = pinsJson.createNestedObject();
+    pin["index"] = pins[i].index;
+    pin["function"] = pins[i].function;
+    pin["pattern"] = pins[i].pattern;
+    pin["num_leds"] = pins[i].num_leds;
+    pin["offset"] = pins[i].offset;
+    JsonArray colors = pin.createNestedArray("colors");
+    String HTMLColorCode;
+    for (j = 0; j < NUM_COLORS; j++) {
+      CRGBToHtmlColorCode(pins[i].colors[j], HTMLColorCode);
+      colors.add(HTMLColorCode);
+    }
+  }
+
+  serializeJsonPretty(doc, s);
+  // doc is freed once it goes out of scope
 }
-*/
 
 // Move 
 /*
@@ -63,6 +110,10 @@ void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
 */
 
 void Settings::setDefaults() {
+  // Zero out Settings struct
+  //this = {};
+  memset(this, 0, sizeof(*this));
+
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
   general.writeCount = 0;
@@ -70,6 +121,7 @@ void Settings::setDefaults() {
   
   for (int i = 0; i < general.numPins; i++) {
     pins[i].index = i;
+    pins[i].colors[0] = CRGB::HTMLColorCode::Blue;
   }
 }
 
@@ -114,11 +166,12 @@ bool Settings::IO(bool IsWriting) {
 
   crc = crc32Buffer(this, sizeof(*this));
   if (!IsWriting && crc != crcCopy) {
-    // Reading from EEPROM and crc doesn't check out, restore defaults and exit
-    Serial.print("CRC didn't align. Restoring defaults!\n");
-    setDefaults();
-    rc = RC_SUCCESS;
-    goto Finish;
+    // Reading from EEPROM and crc doesn't check out, create defaults and
+    // write to flash
+    Serial.print("CRC didn't align. Creating defaults!\n");
+    setDefaults(); // zeroes entire struct, including crc
+    general.crc = crc32Buffer(this, sizeof(*this));
+    IsWriting = true;
   } else {
     // Either the crc matched or we want to use the new crc value for writing
     general.crc = crc;

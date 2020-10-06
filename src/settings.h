@@ -33,7 +33,6 @@ _Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * NUM_PINS <= FLASH_PAG
 
 #include <cstdio>
 #include <string>
-#include <iostream>
 
 // Thanks sourcey!
 // https://sourcey.com/articles/comparing-version-strings-in-cpp
@@ -61,18 +60,12 @@ struct Version
 			&& revision == other.revision
 			&& build == other.build;
 	}
-
-	friend std::ostream& operator << (std::ostream& stream, const Version& ver)
-	{
-		stream << ver.major;
-		stream << '.';
-		stream << ver.minor;
-		stream << '.';
-		stream << ver.revision;
-		stream << '.';
-		stream << ver.build;
-		return stream;
-	}
+   void toString(const Version& ver, String& s) {
+     // Probably not the proper way to do this, but we're on an Arduino
+     char temp[3+3+3+4+1+1]; // 00.00.00.0000, not sure why extra one is needed
+     snprintf(temp, sizeof(temp), "%02d.%02d.%02d.%04d", ver.major, ver.minor, ver.revision, ver.build);
+     s = temp;
+   }
 };
 
 #define SETTINGS_GENERAL_BYTE_COUNT 17
@@ -86,10 +79,11 @@ typedef struct  {
   // When adding fields:
   //   * Increase byte count (SETTINGS_GENERAL_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
+  //   * Add fields to serialize() and deserialize()
   uint8 reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
 } SettingsGeneral;
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
-const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(3);
+const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(4);
 
 #define NUM_COLORS 5
 #define EASY_LED_PIN_BYTE_COUNT 24
@@ -104,13 +98,14 @@ struct EasyLEDPin {
   // When adding fields:
   //   * Increase byte count (EASY_LED_PIN_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
+  //   * Add fields to serialize() and deserialize()
   uint8 reserved[EASY_LED_PIN_SIZE - EASY_LED_PIN_BYTE_COUNT];
 };
 _Static_assert(sizeof(EasyLEDPin) == EASY_LED_PIN_SIZE, "");
 // This doesn't technically need to be in the .h file since we aren't exposing it
 // to other files, but it makes adding fields to EasyLEDPin easier
-//                                   Colors                  rest of fields
-const int EasyLEDPinJsonCapacity = 5*JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(5);
+//                                                  Colors                      rest of fields
+const int EasyLEDPinJsonCapacity = JSON_OBJECT_SIZE(1) + JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(5);
 
 
 
@@ -127,16 +122,21 @@ struct Settings {
     uint8 reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
 
     // Default constructor
-    //Settings() {};
+    Settings() {};
 
     void read() {
       // Automatically read from eeprom on init
       IO(SETTINGS_IO_READ);
     }
 
-    bool write() {
+    bool save() {
       return IO(SETTINGS_IO_WRITE);
     }
+
+    // Unchanged string as input, passed by reference
+    bool deserialize(const String& s);
+    // String pointer as output so it doesn't go out of scope
+    void serialize(String& s);
 
     private:
       // IsWriting:
@@ -150,7 +150,13 @@ struct Settings {
 // char (*__kaboom)[sizeof(Settings)] = 1;
 // Make sure size is appropriate
 _Static_assert(sizeof(Settings) == FLASH_PAGE_SIZE, "");
-const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + NUM_PINS*EasyLEDPinJsonCapacity;
+const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + 
+                                 // pins array
+                                 JSON_OBJECT_SIZE(1) + 
+                                 // NUM_PINS pins
+                                 JSON_ARRAY_SIZE(NUM_PINS) + NUM_PINS*EasyLEDPinJsonCapacity +
+                                 // magical number, not sure where it comes from
+                                 JSON_ARRAY_SIZE(2);
 
 
 #endif // _SETTINGS_H_
