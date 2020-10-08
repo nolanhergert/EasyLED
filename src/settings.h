@@ -150,6 +150,7 @@ struct Settings {
 // char (*__kaboom)[sizeof(Settings)] = 1;
 // Make sure size is appropriate
 _Static_assert(sizeof(Settings) == FLASH_PAGE_SIZE, "");
+// Created using https://arduinojson.org/v6/assistant/
 const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + 
                                  // pins array
                                  JSON_OBJECT_SIZE(1) + 

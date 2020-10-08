@@ -33,7 +33,7 @@ CRGB leds[TOTAL_NUM_LEDS];
 
 
 
-#define DEFAULT_BRIGHTNESS (uint8)64 // can be dynamically changed though
+#define DEFAULT_BRIGHTNESS (uint8)255 // can be dynamically changed though
 #define FRAMES_PER_SECOND  200
 
 
