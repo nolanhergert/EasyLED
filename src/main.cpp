@@ -121,9 +121,11 @@ void setup() {
     server.send_P(200, "text/html", INDEX_HTML);
   });
 
-  server.on("/get", []() {
+  server.on("/settings.json", []() {
     // Send a JSON file of our current settings
-    //server.send(200, "text/json", createJsonResponse());
+    String json;
+    settings.serialize(json);
+    server.send(200, "text/json", json);
   });
 
   // Using PATCH so we can be RESTful and be clear that we don't want to

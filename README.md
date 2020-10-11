@@ -1,4 +1,8 @@
 # LedStripController
+Main use cases:
+  * Control multiple led strips from one controller
+  * Portable outdoor control and mounting (optional)
+  * Very little setup required!
 
 Works best with Platform.io.
 

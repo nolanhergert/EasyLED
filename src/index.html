@@ -95,9 +95,8 @@ body {
 </div>
 
 
-
+Pin
 <div class="radio-toolbar">
-  Pin
   <div class="pair">
     <input type="radio" id="radioOne" name="radioPin" value="1" checked>
     <label for="radioOne">1</label>
@@ -131,9 +130,8 @@ body {
 
 <label>Choose a function:
   <select name="function">
-    <option value="empty"></option>
-    <option value="0">_Combine With</option>
-    <option value="1">Animation</option>
+    <option value="0">Animation</option>
+    <!--<option value="1">Combine With</option>-->
   </select>
 </label>
 <p></p>
@@ -195,26 +193,144 @@ body {
 
 
 <script>
+let jsonFoo = `{
+  "version": "00.01.00.0000",
+  "writeCount": 0,
+  "crc": 3578075235,
+  "numPins": 8,
+  "pins": [
+    {
+      "index": 0,
+      "function": 0,
+      "pattern": 7,
+      "num_leds": 10,
+      "offset": 0,
+      "colors": [
+        "#ff0000",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 1,
+      "function": 0,
+      "pattern": 6,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 2,
+      "function": 0,
+      "pattern": 5,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 3,
+      "function": 0,
+      "pattern": 0,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 4,
+      "function": 0,
+      "pattern": 0,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 5,
+      "function": 0,
+      "pattern": 0,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 6,
+      "function": 0,
+      "pattern": 0,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    {
+      "index": 7,
+      "function": 0,
+      "pattern": 0,
+      "num_leds": 0,
+      "offset": 0,
+      "colors": [
+        "#0000ff",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    }
+  ]
+}
+`;
 
 
 
-// Get latest data using JSON asyncronous request
+let settings;// = JSON.parse(jsonFoo);
+
+// Get latest data on page load using JSON asyncronous request
 // https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
-/*
 
-fetch('products.json').then(function(response) {
-  //return response.json();
-  // Maybe this is helpful? https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON
-  JSON.parse();     // input  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-  JSON.stringify(); // output https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
-}).
-
-*/
-
-
-
-
-
+fetch('settings.json')
+  .then(response => response.json())
+  .then((response) => {
+    console.log(response);
+    console.log(response['crc']);
+    settings = response;
+    console.log(settings['crc']);
+    pinChanged();
+  });
 
 
 //document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
@@ -289,25 +405,60 @@ class CombineCustomizer extends AnimationCustomizer {
 // TODO: Load already saved data from wemos d1 mini
 
 var customizers = [];
-var animationCustomizer = new AnimationCustomizer();//.setup();
+var animationCustomizer = new AnimationCustomizer();
 animationCustomizer.setup();
 customizers.push(animationCustomizer);
-var combineCustomizer = new CombineCustomizer();//.setup();
+/*
+var combineCustomizer = new CombineCustomizer();
 combineCustomizer.setup();
 customizers.push(combineCustomizer);
+*/
 
-let activeCustomizer = animationCustomizer;
+
 let currentPin = 1;
-let currentFunction = 0;
+let activeCustomizer = customizers[0];
+
+function pinChanged() {
+  activeCustomizer.hide();
+  // Set current function and customizer for the pin
+  document.getElementsByName("function")[0].value = settings["pins"][currentPin-1]["function"];
+  console.log("customizer index: ", settings["pins"][currentPin-1]["function"]);
+  activeCustomizer = customizers[settings["pins"][currentPin-1]["function"]];
+  // Set all customizer values
+  for (let customizer of customizers) {
+    // Set the customizer values
+    for (let input of customizer.inputs) {
+      if ("color1" === input.name) {
+        // Hack it for now
+        input.value = settings["pins"][currentPin-1]["colors"][0];
+      } else {
+        input.value = settings["pins"][currentPin-1][input.name];
+      }
+      console.log(input.name, input.value);
+    }
+  }
+  activeCustomizer.show();
+}
 
 function onPinSelection(e) {
   currentPin = e.target.value;
-  // TODO: Probably want to load saved form values from microcontroller here
-  // for the customizer
-  
-  // I would set the "save to eeprom frequency" to 5 seconds of inactivity. Maybe with a
-  // quick color change to show 
+  pinChanged();
 }
+
+
+
+/*
+
+fetch('settings.json').then(function(response) {
+  //return response.json();
+  // Maybe this is helpful? https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON
+  JSON.parse();     // input  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+  JSON.stringify(); // output https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+}).
+
+*/
+
+
 
 // Set pin handler
 document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
@@ -336,23 +487,12 @@ function onGeneralInput(e) {
 // Selector on change
 const selectElement = document.querySelector('.pattern');
 document.getElementsByName("function")[0].addEventListener('change', (event) => {
-  // Hide all customizers
+  // Hide current customizer
+  activeCustomizer.hide();
   customizers.forEach(c => c.hide());
-  
-  // Refactor this list to be an array of string name, customizer? Generate html
-  currentFunction = event.target.value;
-  switch(currentFunction) {
-    case "0":
-	  activeCustomizer = combineCustomizer;
-      break;
-    case "1":
-	  activeCustomizer = animationCustomizer;
-      break;
-
-  }
+  activeCustomizer = customizers[event.target.value];
   activeCustomizer.show();
 });
-
 
 /*
 

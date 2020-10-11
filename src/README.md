@@ -12,8 +12,9 @@ Minimum Viable Product
     * DONE! Coat pin ends with hot glue until ready to use?
     * DONE! How to make mold that is reusable
   * Wifi turns off after N (60?) seconds if unused for security? If you have 
-  * 4-strip version can have half the resin / board size? Should be much smaller...nice!
+  * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think.
+  * Limit current
 
 Somehow wled.me works on android?
 
