@@ -30,9 +30,14 @@
 #define EASY_LED_PIN_SIZE 256
 _Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * NUM_PINS <= FLASH_PAGE_SIZE, "");
 
+#include <inttypes.h>
 
 #include <cstdio>
 #include <string>
+#include <ESP8266WebServer.h>
+
+
+
 
 // Thanks sourcey!
 // https://sourcey.com/articles/comparing-version-strings-in-cpp
@@ -60,20 +65,24 @@ struct Version
 			&& revision == other.revision
 			&& build == other.build;
 	}
-   void toString(const Version& ver, String& s) {
-     // Probably not the proper way to do this, but we're on an Arduino
-     char temp[3+3+3+4+1+1]; // 00.00.00.0000, not sure why extra one is needed
-     snprintf(temp, sizeof(temp), "%02d.%02d.%02d.%04d", ver.major, ver.minor, ver.revision, ver.build);
-     s = temp;
-   }
+  void toString(String& s) {
+    // Probably not the proper way to do this, but we're on an Arduino
+    char temp[3+3+3+4+1+1]; // 00.00.00.0000, not sure why extra one is needed
+    snprintf(temp, sizeof(temp), "%02d.%02d.%02d.%04d", major, minor, revision, build);
+    s = temp;
+  }
+  void fromString(const String& s) {
+    sscanf(s.c_str(), "%02" SCNd16 ".%02" SCNd16 ".%02" SCNd16 ".%04" SCNd16, &major, &minor, &revision, &build);
+  }
 };
 
-#define SETTINGS_GENERAL_BYTE_COUNT 17
+#define SETTINGS_GENERAL_BYTE_COUNT 18
 typedef struct  {
   Version version;
   uint16 writeCount;
   uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
   uint8 numPins; // Always store NUM_PINS in flash, but limit display on GUI to numPins
+  uint8 brightness; // 0-255
   // Wifi ID, password, and encryption level?
 
   // When adding fields:
@@ -83,16 +92,16 @@ typedef struct  {
   uint8 reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
 } SettingsGeneral;
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
-const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(4);
+const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(5);
 
 #define NUM_COLORS 5
 #define EASY_LED_PIN_BYTE_COUNT 24
 struct EasyLEDPin {
   uint8 index;
-  uint8 function;
-  uint16 pattern;
-  uint16 num_leds;
-  uint16 offset;
+  uint8 function; // >0
+  uint16 pattern; // >0
+  uint16 num_leds;// >0
+  sint16 offset;  
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
   // When adding fields:
@@ -133,10 +142,14 @@ struct Settings {
       return IO(SETTINGS_IO_WRITE);
     }
 
-    // Unchanged string as input, passed by reference
-    bool deserialize(const String& s);
     // String pointer as output so it doesn't go out of scope
-    void serialize(String& s);
+    void serialize(String& json);
+    // String as input and *modified* in the function
+    // Untested!
+    //void deserialize(const String& json);
+    // Simple and fast solution for now
+    bool ParseURLArgs(ESP8266WebServer& server);
+    
 
     private:
       // IsWriting:

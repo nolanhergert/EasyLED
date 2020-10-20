@@ -169,24 +169,7 @@ void setup() {
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now
-    if (server.argName(0) == "brightness") {
-      FastLED.setBrightness(server.arg(0).toInt());
-    } else if (server.argName(0) == "save") {
-      if (RC_FAILURE == settings.save()) {
-        // Return an error to server?!
-        Serial.println("Unsuccessful in writing to eeprom");
-      }
-    } else if (server.argName(0) == "pin") {
-      // Pins start at 0 offset in the pin table
-      pin = server.arg(0).toInt() - 1;
-      Serial.println(pin);
-      for (int i = 1; i < server.args(); i++) {
-        //ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
-      }
-    } else {
-      Serial.print("Invalid argument: ");
-      Serial.println(server.argName(0));
-    }
+    settings.ParseURLArgs(server);
     server.send(200);
   });
 

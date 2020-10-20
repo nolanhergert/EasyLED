@@ -4,7 +4,7 @@
 #include <EEPROM.h>
 #include "common.h"
 
-// #001122 -> CRGB
+// "#RRGGBB" -> 0xRRGGBB
 CRGB HTMLColorCodeToCRGB(const String& s) {
   // Thanks Michael! https://stackoverflow.com/a/3409211/931280
   // WARNING: no sanitization or error-checking whatsoever
@@ -13,6 +13,7 @@ CRGB HTMLColorCodeToCRGB(const String& s) {
   return c;
 }
 
+// 0xRRGGBB -> "#RRGGBB"
 void CRGBToHtmlColorCode(CRGB c, String& s) {
   // Thanks Doug! https://stackoverflow.com/a/2342176/931280
   char temp[8];
@@ -26,32 +27,19 @@ void CRGBToHtmlColorCode(CRGB c, String& s) {
 
 // Don't need to be future compatible, since we're also serving 
 // that the user is interacting with.... is that logic right?
-// So we can use a StaticJsonDocument on the stack
-// Stack size is 4K, so need to use heap
-//DynamicJsonDocument<SettingsJsonCapacity> doc;
+// Stack size is 4K, so probably should use heap
 void Settings::serialize(String& s) {
-  /*
-  StaticJsonDocument<500> jsonBuffer;
-
-  JsonObject &root = jsonBuffer.createObject();
-  JsonArray &tempValues = root.createNestedArray("temperature");
-  tempValues.add(5);
-
-  String json;
-  serializeJsonPretty(root, json);
-  return json;
-  */
   int i, j = 0;
   DynamicJsonDocument doc(SettingsJsonCapacity);
 
-
   // General settings
-  String ver;
-  general.version.toString(general.version, ver);
-  doc["version"] = ver;
+  String version;
+  general.version.toString(version);
+  doc["version"] = version;
   doc["writeCount"] = general.writeCount;
   doc["crc"] = general.crc;
   doc["numPins"] = general.numPins;
+  doc["brightness"] = general.brightness;
   
   JsonArray pinsJson = doc.createNestedArray("pins");
   // Settings for each pin
@@ -74,9 +62,78 @@ void Settings::serialize(String& s) {
   // doc is freed once it goes out of scope
 }
 
-// Move 
 /*
-void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
+void Settings::deserialize(const String &json) {
+  DynamicJsonDocument doc(SettingsJsonCapacity);
+  deserializeJson(doc, json);
+  int i, j = 0;  // Settings for each pin
+
+  
+  // Save a few clock cycles this way https://arduinojson.org/v6/api/jsonobject/containskey/
+  uint8 function; // >0
+  uint16 pattern; // >0
+  uint16 num_leds;// >0
+
+  // Only deserialize what we know about. Ignore? everything else
+  // Should be able to handle partial updates too...
+  
+  
+
+  // Don't need or want to modify these normally
+  //doc["version"] = ver;
+  //doc["writeCount"] = general.writeCount;
+  //doc["crc"] = general.crc;
+  //doc["numPins"] = general.numPins;
+
+  // Going a little weird here because 0 is a valid brightness value
+  // https://arduinojson.org/v6/api/jsonobject/containskey/
+  JsonVariant brightness = doc["brightness"];
+  if (!brightness.isNull()) {
+    general.brightness = brightness.as<uint8>();
+  }
+
+  JsonArray pinsJson = doc["pins"];
+  if (!pinsJson) return;
+
+
+  for (i = 0; i < general.numPins; i++) {
+    JsonObject pin = pinsJson[i];
+    if (!pin) continue; // no pin value provided
+
+    // Don't want to change this value
+    //pin["index"] = pins[i].index;
+    function = pin["function"];
+    if (function > 0) {
+      pins[i].function = function;
+    }
+    pattern = pin["pattern"];
+    if (pattern > 0) {
+      pins[i].pattern = pattern;
+    }
+    num_leds = pin["num_leds"];
+    if (num_leds > 0) {
+      pins[i].num_leds = num_leds;
+    }
+    JsonVariant offset = pin["offset"];
+    if (!offset.isNull()) {
+      pins[i].offset = offset.as<sint16>();
+    }
+    JsonArray colors = pin.createNestedArray("colors");
+    if (!colors) {
+      String HTMLColorCode;
+      for (j = 0; j < NUM_COLORS; j++) {
+        CRGBToHtmlColorCode(pins[i].colors[j], HTMLColorCode);
+        colors.add(HTMLColorCode);
+      }
+    }
+  } 
+}
+*/
+
+
+// Move 
+bool Settings::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
+
   Serial.print("Parsing: ");
   Serial.print(argName);
   Serial.print(", ");
@@ -92,7 +149,7 @@ void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
     UpdateLedStrip(pin);
   } else if (argName == "color0") {
     // Thanks Michael! https://stackoverflow.com/a/3409211/931280
-    / WARNING: no sanitization or error-checking whatsoever
+    // WARNING: no sanitization or error-checking whatsoever
     
     int pos = 0;
     for (int count = 0; count < 3; count++) {
@@ -107,6 +164,34 @@ void Pin::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
     Serial.println(argName);
   }
 }
+
+bool Settings::ParseURLArgs(ESP8266WebServer& server) {
+  // Some properties are general, others are parts of a pin
+  // And everything needs to get updated *live*, so having trouble
+  // deciding where to put everything so that it's flexible long-
+  // term.
+  uint8 pin = 0;
+
+  if (server.argName(0) == "brightness") {
+    general.brightness = server.arg(0).toInt();
+    FastLED.setBrightness(general.brightness);
+  } else if (server.argName(0) == "save") {
+    if (RC_FAILURE == save()) {
+      // Return an error to server?!
+      Serial.println("Unsuccessful in writing to eeprom");
+    }
+  } else if (server.argName(0) == "pin") {
+    // Pins start at 0 offset in the pin table
+    pin = server.arg(0).toInt() - 1;
+    Serial.println(pin);
+    for (int i = 1; i < server.args(); i++) {
+      ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
+    }
+  } else {
+    Serial.print("Invalid argument: ");
+    Serial.println(server.argName(0));
+  }
+}
 */
 
 void Settings::setDefaults() {
@@ -116,7 +201,7 @@ void Settings::setDefaults() {
 
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
-  general.writeCount = 0;
+  general.writeCount = 1;
   general.numPins = NUM_PINS;
   
   for (int i = 0; i < general.numPins; i++) {

@@ -130,8 +130,8 @@ Pin
 
 <label>Choose a function:
   <select name="function">
-    <option value="0">Animation</option>
-    <!--<option value="1">Combine With</option>-->
+    <option value="1">Animation</option>
+    <!--<option value="2">Combine With</option>-->
   </select>
 </label>
 <p></p>
@@ -152,14 +152,14 @@ Pin
 
 	<label>Pattern: 
 	  <select name="pattern">
-    <option value="0">Rainbow</option>
-    <option value="1">Rainbow With Glitter</option>
-		<option value="2">Color</option>
-    <option value="3">Fill Noise</option>
-    <option value="4">Juggle</option>
-    <option value="5">Confetti</option>
-    <option value="6">Sinelon</option>
-    <option value="7">BPM</option>
+    <option value="1">Rainbow</option>
+    <option value="2">Rainbow With Glitter</option>
+		<option value="3">Color</option>
+    <option value="4">Fill Noise</option>
+    <option value="5">Juggle</option>
+    <option value="6">Confetti</option>
+    <option value="7">Sinelon</option>
+    <option value="8">BPM</option>
 	  </select>
 	</label>
 
@@ -317,11 +317,11 @@ let jsonFoo = `{
 
 
 
-let settings;// = JSON.parse(jsonFoo);
+let settings = JSON.parse(jsonFoo);
 
 // Get latest data on page load using JSON asyncronous request
 // https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
-
+/*
 fetch('settings.json')
   .then(response => response.json())
   .then((response) => {
@@ -331,7 +331,7 @@ fetch('settings.json')
     console.log(settings['crc']);
     pinChanged();
   });
-
+*/
 
 //document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
 /*
@@ -466,6 +466,7 @@ document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
 function onCustomizerInput(e) {
   // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
   // Publish current pin and property
+  // I like it for it's simplicity and efficiency. Keeping it for now
   fetch(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
   //console.log(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
   
@@ -473,6 +474,12 @@ function onCustomizerInput(e) {
   // Alternatively one could also publish all details of the
   // currently active customizer
   //activeCustomizer.publish();
+
+  // Or publish the pin as JSON
+  // JSON.stringify(settings["pins"][0])
+
+  // Or walk up the tree just for that property
+  // https://stackoverflow.com/a/61693085/931280
 } 
 
 // Probably want to refactor this and the above to be together
