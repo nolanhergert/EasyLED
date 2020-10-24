@@ -12,6 +12,7 @@ Minimum Viable Product
     * DONE! Coat pin ends with hot glue until ready to use?
     * DONE! How to make mold that is reusable
   * Wifi turns off after N (60?) seconds if unused for security? If you have 
+  * Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
   * Serial number, epoxy type, case design, num pins, in flash eeprom. 
 
 Somehow wled.me works on android?
