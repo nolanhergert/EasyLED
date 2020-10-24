@@ -11,7 +11,9 @@ Minimum Viable Product
   * DONE! Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
     * DONE! Coat pin ends with hot glue until ready to use?
     * DONE! How to make mold that is reusable
-  * Wifi turns off after N (60?) seconds if unused for security? If you have 
+  * Wifi turns off after N (60?) seconds if unused for security and power consumption?
+  * DONE! Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
+    * Make unique wifi name using mac address like wled. Double check wled support of multiple strips?
   * Serial number, epoxy type, case design, num pins, in flash eeprom. 
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think.
@@ -55,8 +57,12 @@ https://www.jqueryscript.net/blog/best-number-input-spinner.html#:~:text=Simple%
 
 Going to roll my own (simple) one though.
 == DNS ==
-Works great on everything except Android. Waiting for this issue to get resolved: https://issuetracker.google.com/issues/140786115
+Ended up not going with mDNS, since it sorta stopped working? Whatever.
+Using a captive portal method and only responding to easyled.local. Might need to revisit in the future if you don't go with AP mode.
 
+
+= Old =
+Works great on everything except Android. Waiting for this issue to get resolved: https://issuetracker.google.com/issues/140786115
 I guess I can keep "easyled.local" set up though. Not so bad. For Android it'll stay as an IP address, 192.168.4.1 works fine.
 == WLED Patterns ==
 Described here: https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes, and copied to FX.h and FX.cpp
