@@ -45,9 +45,7 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
-
-#include <ESP8266mDNS.h>
-
+#include <DNSServer.h>
 #include <iostream>
 #include <map>
 #include <string>
@@ -60,10 +58,13 @@
 #include <EEPROM.h>
 
 #define SSID "EasyLED"
+#define DNS_NAME "easyled.local"
 // No password for now
 
 
 struct Settings settings;
+
+DNSServer dnsServer;
 
 
 void UpdateLedStrip(EasyLEDPin *pin) {
@@ -148,13 +149,8 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(myIP);
 
-    // Set up mDNS responder:
-  // - first argument is the domain name, in this example
-  //   the fully-qualified domain name is "esp8266.local"
-  // - second argument is the IP address to advertise
-  //   we send our IP address on the WiFi network
-  MDNS.begin("easyled");
-  Serial.println("mDNS responder started");
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.start(53, DNS_NAME, WiFi.softAPIP());
 
 
   // Allow http updates
@@ -191,8 +187,7 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-    // Add service to MDNS-SD
-  MDNS.addService("http", "tcp", 80);
+
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -206,7 +201,8 @@ uint16 b = 0;
 int8 inc = 1;
 void loop() {
   server.handleClient();
-  MDNS.update();
+  
+  dnsServer.processNextRequest();
   loop_FastLED();
 
 /*
