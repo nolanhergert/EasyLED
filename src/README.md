@@ -18,6 +18,7 @@ Minimum Viable Product
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think.
   * Limit current
+    * Have a setting for it, but need to have a good default strip length. Since fastled can't tell whether display is actually driving or not
 
 Somehow wled.me works on android?
 

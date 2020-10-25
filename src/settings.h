@@ -20,7 +20,7 @@
 // Index is 0-7, but pin number on the board and GUI is 1-8
 // Be careful of changing this value! Used in a number of places...
 // TODO: Is it ok to modify this for a resin-cast 4-pin board? Need to reset to defaults correctly...
-#define NUM_PINS 8
+#define MAX_PINS 8
 
 // Do not modify this without also providing backwards compatibility with
 // earlier software revisions (with different sizes)!
@@ -28,7 +28,7 @@
 // maintaining backwards compatibility
 #define SETTINGS_GENERAL_SIZE 1024
 #define EASY_LED_PIN_SIZE 256
-_Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * NUM_PINS <= FLASH_PAGE_SIZE, "");
+_Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * MAX_PINS <= FLASH_PAGE_SIZE, "");
 
 #include <inttypes.h>
 
@@ -67,7 +67,7 @@ struct Version
 	}
   void toString(String& s) {
     // Probably not the proper way to do this, but we're on an Arduino
-    char temp[3+3+3+4+1+1]; // 00.00.00.0000, not sure why extra one is needed
+    char temp[3+3+3+4+1]; // 00.00.00.0000
     snprintf(temp, sizeof(temp), "%02d.%02d.%02d.%04d", major, minor, revision, build);
     s = temp;
   }
@@ -76,26 +76,30 @@ struct Version
   }
 };
 
-#define SETTINGS_GENERAL_BYTE_COUNT 18
-typedef struct  {
+#define SETTINGS_GENERAL_BYTE_COUNT 24
+typedef struct {
   Version version;
   uint16 writeCount;
+  uint8 PADDING_USE_ME_0[2]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
-  uint8 numPins; // Always store NUM_PINS in flash, but limit display on GUI to numPins
+  uint8 numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
   uint8 brightness; // 0-255
+  uint8 PADDING_USE_ME_1[2];
+  uint32 maxPowerMilliwatts;
   // Wifi ID, password, and encryption level?
 
   // When adding fields:
+  //   * Try to use padding bytes first. Add padding bytes for unaligned reads/writes
   //   * Increase byte count (SETTINGS_GENERAL_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
-  //   * Add fields to serialize() and deserialize()
+  //   * Add fields to serialize() and ParsePinVariable() in main.cpp
   uint8 reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
 } SettingsGeneral;
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
-const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(5);
+const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(6);
 
 #define NUM_COLORS 5
-#define EASY_LED_PIN_BYTE_COUNT 24
+#define EASY_LED_PIN_BYTE_COUNT 23
 struct EasyLEDPin {
   uint8 index;
   uint8 function; // >0
@@ -105,6 +109,7 @@ struct EasyLEDPin {
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
   // When adding fields:
+  //   * Try to use padding bytes first. Add padding bytes for unaligned reads/writes
   //   * Increase byte count (EASY_LED_PIN_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
   //   * Add fields to serialize() and deserialize()
@@ -126,7 +131,7 @@ const int EasyLEDPinJsonCapacity = JSON_OBJECT_SIZE(1) + JSON_ARRAY_SIZE(5) + JS
 // It's C++, so structs are classes too!
 struct Settings {
     SettingsGeneral general;
-    EasyLEDPin pins[NUM_PINS];
+    EasyLEDPin pins[MAX_PINS];
     // There's some room yet
     uint8 reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
 
@@ -146,10 +151,10 @@ struct Settings {
     void serialize(String& json);
     // String as input and *modified* in the function
     // Untested!
+    // Going with fast and simple solution for now,
+    // ParseURLArgs() in main.cpp
     //void deserialize(const String& json);
-    // Simple and fast solution for now
-    bool ParseURLArgs(ESP8266WebServer& server);
-    
+    void setDefaults();
 
     private:
       // IsWriting:
@@ -158,17 +163,16 @@ struct Settings {
       // Reference: https://arduino-esp8266.readthedocs.io/en/latest/libraries.html#eeprom
       bool IO(bool IsWriting);
 
-      void setDefaults();
+      
 };
-// char (*__kaboom)[sizeof(Settings)] = 1;
 // Make sure size is appropriate
 _Static_assert(sizeof(Settings) == FLASH_PAGE_SIZE, "");
 // Created using https://arduinojson.org/v6/assistant/
 const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + 
                                  // pins array
                                  JSON_OBJECT_SIZE(1) + 
-                                 // NUM_PINS pins
-                                 JSON_ARRAY_SIZE(NUM_PINS) + NUM_PINS*EasyLEDPinJsonCapacity +
+                                 // MAX_PINS pins
+                                 JSON_ARRAY_SIZE(MAX_PINS) + MAX_PINS*EasyLEDPinJsonCapacity +
                                  // magical number, not sure where it comes from
                                  JSON_ARRAY_SIZE(2);
 

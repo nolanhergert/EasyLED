@@ -4,6 +4,10 @@
 #include <EEPROM.h>
 #include "common.h"
 
+
+#define DEFAULT_BRIGHTNESS (uint8)255 // can be dynamically changed though
+#define DEFAULT_MAX_MILLIWATTS 4 * 1000 // 4V * 1000mA, need to play with this some more
+
 // "#RRGGBB" -> 0xRRGGBB
 CRGB HTMLColorCodeToCRGB(const String& s) {
   // Thanks Michael! https://stackoverflow.com/a/3409211/931280
@@ -21,7 +25,6 @@ void CRGBToHtmlColorCode(CRGB c, String& s) {
   s = temp;
 }
 
-
 // Very stack inefficient probably? Not sure...
 // Probably want to do something like this: https://github.com/bblanchon/ArduinoJson/issues/166
 
@@ -31,15 +34,17 @@ void CRGBToHtmlColorCode(CRGB c, String& s) {
 void Settings::serialize(String& s) {
   int i, j = 0;
   DynamicJsonDocument doc(SettingsJsonCapacity);
-
+  
   // General settings
   String version;
+
   general.version.toString(version);
   doc["version"] = version;
   doc["writeCount"] = general.writeCount;
   doc["crc"] = general.crc;
   doc["numPins"] = general.numPins;
   doc["brightness"] = general.brightness;
+  doc["maxPowerMilliwatts"] = general.maxPowerMilliwatts;
   
   JsonArray pinsJson = doc.createNestedArray("pins");
   // Settings for each pin
@@ -57,7 +62,7 @@ void Settings::serialize(String& s) {
       colors.add(HTMLColorCode);
     }
   }
-
+  
   serializeJsonPretty(doc, s);
   // doc is freed once it goes out of scope
 }
@@ -131,82 +136,29 @@ void Settings::deserialize(const String &json) {
 */
 
 
-// Move 
-bool Settings::ParsePinArg(EasyLEDPin *pin, String argName, String argValue) {
-
-  Serial.print("Parsing: ");
-  Serial.print(argName);
-  Serial.print(", ");
-  Serial.println(argValue);
-  if (argName == "function") {
-    pin->function = argValue.toInt();
-    // TODO: Switch on function
-  } else if (argName == "num_leds") {
-    pin->num_leds = argValue.toInt();
-    UpdateLedStrip(pin);
-  } else if (argName == "pattern") {
-    pin->pattern = argValue.toInt();
-    UpdateLedStrip(pin);
-  } else if (argName == "color0") {
-    // Thanks Michael! https://stackoverflow.com/a/3409211/931280
-    // WARNING: no sanitization or error-checking whatsoever
-    
-    int pos = 0;
-    for (int count = 0; count < 3; count++) {
-      // 1 = Skip the "#" symbol
-      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
-      pos += 2;
-    }
-    UpdateLedStrip(pin);
-    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
-  } else {
-    Serial.print("Match not found for: ");
-    Serial.println(argName);
-  }
-}
-
-bool Settings::ParseURLArgs(ESP8266WebServer& server) {
-  // Some properties are general, others are parts of a pin
-  // And everything needs to get updated *live*, so having trouble
-  // deciding where to put everything so that it's flexible long-
-  // term.
-  uint8 pin = 0;
-
-  if (server.argName(0) == "brightness") {
-    general.brightness = server.arg(0).toInt();
-    FastLED.setBrightness(general.brightness);
-  } else if (server.argName(0) == "save") {
-    if (RC_FAILURE == save()) {
-      // Return an error to server?!
-      Serial.println("Unsuccessful in writing to eeprom");
-    }
-  } else if (server.argName(0) == "pin") {
-    // Pins start at 0 offset in the pin table
-    pin = server.arg(0).toInt() - 1;
-    Serial.println(pin);
-    for (int i = 1; i < server.args(); i++) {
-      ParsePinArg(&(settings.pins[pin]), server.argName(i), server.arg(i));
-    }
-  } else {
-    Serial.print("Invalid argument: ");
-    Serial.println(server.argName(0));
-  }
-}
-*/
 
 void Settings::setDefaults() {
   // Zero out Settings struct
   //this = {};
+  // Save off a few fields that shouldn't be changed before zeroing
+  uint16 numPins = general.numPins;
+  uint16 writeCount = general.writeCount;
+
+
   memset(this, 0, sizeof(*this));
 
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
-  general.writeCount = 1;
-  general.numPins = NUM_PINS;
+  general.writeCount = writeCount;
+  general.numPins = numPins;
+  general.brightness = DEFAULT_BRIGHTNESS;
+  general.maxPowerMilliwatts = DEFAULT_MAX_MILLIWATTS;
   
   for (int i = 0; i < general.numPins; i++) {
     pins[i].index = i;
     pins[i].colors[0] = CRGB::HTMLColorCode::Blue;
+    pins[i].pattern = i;
+    pins[i].num_leds = 10;
   }
 }
 
@@ -226,8 +178,8 @@ bool Settings::IO(bool IsWriting) {
   EEPROM.begin(FLASH_PAGE_SIZE);
 
   // Read in initial copy if needed
-  for (i = 0; i < sizeof(*this); i++) {
-    if (!IsWriting) {
+  if (!IsWriting) {
+    for (i = 0; i < sizeof(*this); i++) {
       ((uint8 *)this)[i] = EEPROM.read(i);
     }
   }
@@ -270,19 +222,19 @@ bool Settings::IO(bool IsWriting) {
 
     // Commit to flash
     if (!EEPROM.commit()) {
-      Serial.print("ERROR! EEPROM commit failed\n");
+      Serial.println("ERROR! EEPROM commit failed");
       goto Finish;
     }
 
     // Read data back from flash to ensure integrity
     for (i = 0; i < sizeof(*this); i++) {
       if (EEPROM.read(i) != ((uint8 *)this)[i]) {
-        Serial.print("ERROR! EEPROM failed verification\n");
+        Serial.println("ERROR! EEPROM failed verification");
         goto Finish;
       }
     }
   }
-
+  Serial.println("Success in writing to eeprom! Inside function");
   rc = RC_SUCCESS;
 
 Finish:

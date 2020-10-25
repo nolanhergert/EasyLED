@@ -66,13 +66,88 @@ struct Settings settings;
 
 DNSServer dnsServer;
 
-
 void UpdateLedStrip(EasyLEDPin *pin) {
   ModifyLedStrip(pin->index, pin->num_leds, pin->pattern, pin->colors);
 }
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
+
+// Here for now since it has appendages to multiple modules
+void ParsePinVariable(EasyLEDPin *pin, String argName, String argValue) {
+  Serial.print("Pin: ");
+  Serial.print(pin->index);
+  Serial.print(" Parsing: ");
+  Serial.print(argName);
+  Serial.print(", ");
+  Serial.println(argValue);
+  if (argName == "function") {
+    pin->function = argValue.toInt();
+    // TODO: Switch on function
+  } else if (argName == "num_leds") {
+    pin->num_leds = argValue.toInt();
+    UpdateLedStrip(pin);
+  } else if (argName == "pattern") {
+    pin->pattern = argValue.toInt();
+    UpdateLedStrip(pin);
+  } else if (argName == "color0") {
+    // Thanks Michael! https://stackoverflow.com/a/3409211/931280
+    // WARNING: no sanitization or error-checking whatsoever
+    
+    int pos = 0;
+    for (int count = 0; count < 3; count++) {
+      // 1 = Skip the "#" symbol
+      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
+      pos += 2;
+    }
+    UpdateLedStrip(pin);
+    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
+  } else {
+    Serial.print("Match not found for: ");
+    Serial.println(argName);
+  }
+}
+
+void ParseURLArgs(ESP8266WebServer& server) {
+  // Some properties are general, others are parts of a pin
+  // And everything needs to get updated *live*, so having trouble
+  // deciding where to put everything so that it's flexible long-
+  // term.
+  uint8 pin = 0;
+  Serial.println(server.argName(0));
+
+  if (server.argName(0) == "brightness") {
+    settings.general.brightness = server.arg(0).toInt();
+    FastLED.setBrightness(settings.general.brightness);
+  } else if (server.argName(0) == "save") {
+    Serial.println("Attempting save!");
+    if (RC_FAILURE == settings.save()) {
+      // Return an error to server?!
+      Serial.println("Unsuccessful in writing to eeprom");
+    }
+  } else if (server.argName(0) == "reset") {
+    Serial.println("Attempting reset!");
+    settings.setDefaults();
+    if (RC_FAILURE == settings.save()) {
+      // Return an error to server?!
+      Serial.println("Unsuccessful in writing to eeprom");
+    }
+    // How much do we want to reset? Wifi? Separate function?
+    // For now just do fast led
+    setup_FastLED(&settings);
+    loop_FastLED();
+
+  } else if (server.argName(0) == "pin") {
+    pin = server.arg(0).toInt();
+    Serial.println(pin);
+    for (int i = 1; i < server.args(); i++) {
+      ParsePinVariable(&(settings.pins[pin]), server.argName(i), server.arg(i));
+    }
+  } else {
+    Serial.print("Invalid argument: ");
+    Serial.println(server.argName(0));
+  }
+}
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -91,6 +166,7 @@ void handleNotFound(){
 
 uint8 pin = 0;
 void setup() {
+
   Serial.begin(115200);
   Serial.println();
   // Read in initial settings
@@ -119,8 +195,10 @@ void setup() {
 
   server.on("/settings.json", []() {
     // Send a JSON file of our current settings
+    Serial.println("Received request for json");
     String json;
     settings.serialize(json);
+    //Serial.println(json);
     server.send(200, "text/json", json);
   });
 
@@ -145,27 +223,11 @@ void setup() {
              message += json;
  
       server.send(200, "text/plain", message);
-
-
-
-
-
-
-
-
-      // TODO: Remove me!
-      Serial.println(message);
-
-
-
-
-
-
   });
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now
-    settings.ParseURLArgs(server);
+    ParseURLArgs(server);
     server.send(200);
   });
 
@@ -175,13 +237,9 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-
-
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-
-  setup_FastLED();
-
+  setup_FastLED(&settings);
   
 }
 

@@ -9,6 +9,7 @@
 
 body {
   width: 400px;
+  height: 600px;
 }
 
 .radio-toolbar {
@@ -81,6 +82,14 @@ body {
   float: right;
   font-size: large;
 }
+footer {
+  position: absolute;
+  top: 350px;
+}
+
+#reset {
+  font-size: large;
+}
 /*****************************************/
 
 </style>
@@ -91,38 +100,38 @@ body {
 <div>
   Brightness: 
   <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness">
-  <button type="button" id="save" value="1" disabled="true">Save Changes</button>
+  <button type="button" id="save" value="1">Save Changes</button>
 </div>
 
 
 Pin
 <div class="radio-toolbar">
   <div class="pair">
-    <input type="radio" id="radioOne" name="radioPin" value="1" checked>
+    <input type="radio" id="radioOne" name="radioPin" value="0" checked>
     <label for="radioOne">1</label>
     </br>
-    <input type="radio" id="radioTwo" name="radioPin" value="2">
+    <input type="radio" id="radioTwo" name="radioPin" value="1">
     <label for="radioTwo">2</label>
   </div>
   <div class="pair">
-    <input type="radio" id="radioFive" name="radioPin" value="5">
+    <input type="radio" id="radioFive" name="radioPin" value="4">
     <label for="radioFive">5</label> 
     </br>
-    <input type="radio" id="radioSix" name="radioPin" value="6">
+    <input type="radio" id="radioSix" name="radioPin" value="5">
     <label for="radioSix">6</label> 
   </div>
   <div class="pair">
-    <input type="radio" id="radioThree" name="radioPin" value="3">
+    <input type="radio" id="radioThree" name="radioPin" value="2">
     <label for="radioThree">3</label> 
     </br>
-    <input type="radio" id="radioFour" name="radioPin" value="4">
+    <input type="radio" id="radioFour" name="radioPin" value="3">
     <label for="radioFour">4</label> 
   </div>
   <div class="pair">
-    <input type="radio" id="radioSeven" name="radioPin" value="7">
+    <input type="radio" id="radioSeven" name="radioPin" value="6">
     <label for="radioSeven">7</label> 
     </br>
-    <input type="radio" id="radioEight" name="radioPin" value="8">
+    <input type="radio" id="radioEight" name="radioPin" value="7">
     <label for="radioEight">8</label> 
   </div>  
 </div>
@@ -130,8 +139,8 @@ Pin
 
 <label>Choose a function:
   <select name="function">
-    <option value="1">Animation</option>
-    <!--<option value="2">Combine With</option>-->
+    <option value="0">Animation</option>
+    <!--<option value="1">Combine With</option>-->
   </select>
 </label>
 <p></p>
@@ -152,20 +161,20 @@ Pin
 
 	<label>Pattern: 
 	  <select name="pattern">
-    <option value="1">Rainbow</option>
-    <option value="2">Rainbow With Glitter</option>
-		<option value="3">Color</option>
-    <option value="4">Fill Noise</option>
-    <option value="5">Juggle</option>
-    <option value="6">Confetti</option>
-    <option value="7">Sinelon</option>
-    <option value="8">BPM</option>
+    <option value="0">Rainbow</option>
+    <option value="1">Rainbow With Glitter</option>
+		<option value="2">Color</option>
+    <option value="3">Fill Noise</option>
+    <option value="4">Juggle</option>
+    <option value="5">Confetti</option>
+    <option value="6">Sinelon</option>
+    <option value="7">BPM</option>
 	  </select>
 	</label>
 
     <p></p>
-	<label for="color1">Select your favorite color:</label>
-	<input type="color" id="color1" name="color1" value="#ff0000">
+	<label for="color0">Select your favorite color:</label>
+	<input type="color" id="color0" name="color0" value="#ff0000">
 
 </div>
 
@@ -173,40 +182,47 @@ Pin
 <div class="customizer" id="CombineCustomizer">
 	<label>Choose Pin: 
 	  <select name="combine_pin">
-		<option value="1">1</option>
-		<option value="2">2</option>
-		<option value="3">3</option>
-		<option value="4">4</option>
-		<option value="5">5</option>
-		<option value="6">6</option>
-		<option value="7">7</option>
-		<option value="8">8</option>
+    <!-- D1 on board = D1 on GUI, but arrays start at 0! 0-offset it is... -->
+		<option value="0">1</option>
+		<option value="1">2</option>
+		<option value="2">3</option>
+		<option value="3">4</option>
+		<option value="4">5</option>
+		<option value="5">6</option>
+		<option value="6">7</option>
+		<option value="7">8</option>
 	  </select>
 	</label>
 
 	<!-- Add an pattern offset input text box here? -->
-
+  
 </div>
 
 
+
+<footer>
+<button type="button" id="reset" value="1">Reset To Defaults</button>
+</footer>
 <!------------------------------------------------->
 
 
 <script>
 let jsonFoo = `{
   "version": "00.01.00.0000",
-  "writeCount": 0,
-  "crc": 3578075235,
+  "writeCount": 7,
+  "crc": 1791675105,
   "numPins": 8,
+  "brightness": 255,
+  "maxPowerMilliwatts": 4000,
   "pins": [
     {
       "index": 0,
       "function": 0,
-      "pattern": 7,
+      "pattern": 0,
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#ff0000",
+        "#0000ff",
         "#000000",
         "#000000",
         "#000000",
@@ -216,8 +232,8 @@ let jsonFoo = `{
     {
       "index": 1,
       "function": 0,
-      "pattern": 6,
-      "num_leds": 0,
+      "pattern": 1,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -230,8 +246,8 @@ let jsonFoo = `{
     {
       "index": 2,
       "function": 0,
-      "pattern": 5,
-      "num_leds": 0,
+      "pattern": 2,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -244,8 +260,8 @@ let jsonFoo = `{
     {
       "index": 3,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 0,
+      "pattern": 3,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -258,8 +274,8 @@ let jsonFoo = `{
     {
       "index": 4,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 0,
+      "pattern": 4,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -272,8 +288,8 @@ let jsonFoo = `{
     {
       "index": 5,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 0,
+      "pattern": 5,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -286,8 +302,8 @@ let jsonFoo = `{
     {
       "index": 6,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 0,
+      "pattern": 6,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -300,8 +316,8 @@ let jsonFoo = `{
     {
       "index": 7,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 0,
+      "pattern": 7,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
         "#0000ff",
@@ -317,21 +333,6 @@ let jsonFoo = `{
 
 
 
-let settings = JSON.parse(jsonFoo);
-
-// Get latest data on page load using JSON asyncronous request
-// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
-/*
-fetch('settings.json')
-  .then(response => response.json())
-  .then((response) => {
-    console.log(response);
-    console.log(response['crc']);
-    settings = response;
-    console.log(settings['crc']);
-    pinChanged();
-  });
-*/
 
 //document.getElementsByClassName("decrement").forEach(p => p.onclick = console.log("foo"));
 /*
@@ -345,30 +346,129 @@ var number_pickers = document.getElementsByClassName('number-picker');
 
 
 
+
 // General non-customizer inputs
 document.getElementById("brightness").oninput = onGeneralInput;
 document.getElementById("save").onclick = onGeneralInput;
+document.getElementById("reset").onclick = onGeneralInput;
 
+
+class DisplayManager {
+
+
+  constructor() {
+    this.activeCustomizerIndex = 0;
+    this.currentPinIndex = 0;
+
+    this.customizers = [];
+    var animationCustomizer = new AnimationCustomizer(this);
+    animationCustomizer.setup();
+    this.customizers.push(animationCustomizer);
+    /*
+    var combineCustomizer = new CombineCustomizer();
+    combineCustomizer.setup();
+    this.customizers.push(combineCustomizer);
+  */
+    
+    // Hide all customizers to start
+    this.customizers.forEach(c => c.hide());
+  }
+
+  setGeneralSettings() {
+    document.getElementById("brightness").value = settings["brightness"];
+  }
+
+  setPin(pin) {
+    this.currentPinIndex = pin;
+    this.showCurrentCustomizer();
+  }
+
+  setCurrentCustomizer(f) {
+    // Set global settings
+    settings["pins"][this.currentPinIndex]["function"] = f;
+    // And send an update to the board
+    updatePinVariable(this.currentPinIndex, "function", f);
+    this.showCurrentCustomizer();
+  }
+  
+  // Knowing the current settings and pin, show the proper
+  // customizer with the proper settings
+  showCurrentCustomizer() {
+    // Hide old customizer
+    this.customizers[this.activeCustomizerIndex].hide();
+    // Set new customizer
+    this.activeCustomizerIndex = settings["pins"][this.currentPinIndex]["function"];
+
+    // Set current dropdown value
+    document.getElementsByName("function")[0].value = this.activeCustomizerIndex;
+    console.log("customizer index: ", this.activeCustomizerIndex);
+
+    let pin = settings["pins"][this.currentPinIndex];
+    // Only update the values for the currently active customizer
+    for (let input of this.customizers[this.activeCustomizerIndex].inputs) {
+      if ("color0" === input.name) {
+        // Hack multiple colors for now, only do one
+        input.value = pin["colors"][0];
+      } else {
+        input.value = pin[input.name];
+      }
+      console.log(input.name, input.value);
+    }
+    this.customizers[this.activeCustomizerIndex].show();
+  }
+  
+  onCustomizerInput(name, value) {
+    // Update our internal copy of settings
+    let pin = settings["pins"][this.currentPinIndex];
+    if (name == "color0") {
+      pin["colors"][0] = value;
+    } else {
+      pin[name] = value;
+    }
+
+    // Publish the input to the board too
+    // current pin and property
+    // I like it for it's simplicity and efficiency. Keeping it for now
+    fetch(`/set?pin=${this.currentPinIndex};${name}=${value}`);
+    //console.log(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
+    
+    // Alternatively one could also publish all details of the
+    // currently active customizer
+    //activeCustomizer.publish();
+
+    // Or publish the pin as JSON
+    // JSON.stringify(settings["pins"][0])
+
+    // Or walk up the tree just for that property
+    // https://stackoverflow.com/a/61693085/931280
+  }
+}
+
+function onCustomizerInput(e) {
+  // Would put this inside of DisplayManager, but for some reason "this"
+  // isn't accessible inside of there...weird
+  d.onCustomizerInput(e.target.name, e.target.value);
+}
 
 // TODO is the constructor occurring correctly?? Seems to only be 
 // happening for one customizer and not iterating over all of them?
 // Should probably be using class too
 
 class AnimationCustomizer {
-  constructor() {
+  constructor(displayManager) {
     this.div = document.getElementById("AnimationCustomizer");
+    this.d = displayManager;
   }
   
   setup() {
-	this.hide();
-	this.inputs = this.div.querySelectorAll('input, textarea, select');
-	// Set up onChanged callback for each input element
-	// to send out the full query string for the form (for now)
-	for (let input of this.inputs) {
-	  // We want to use oninput() as it's live, whereas onchanged()
-	  // is only after the object loses focus.
-	  input.oninput = onCustomizerInput;
-	}	
+    this.inputs = this.div.querySelectorAll('input, textarea, select');
+    // Set up onChanged callback for each input element
+    // to send out the full query string for the form (for now)
+    for (let input of this.inputs) {
+      // We want to use oninput() as it's live, whereas onchanged()
+      // is only after the object loses focus.
+      input.oninput = onCustomizerInput;
+    }	
   }
   
   hide() {
@@ -380,15 +480,6 @@ class AnimationCustomizer {
   }
   
   publish() {
-    // Unused right now
-    /*
-    // Send a string with the inputs in query string form
-    console.log("pin", currentPin);
-    console.log("function", currentFunction);
-    for (let input of this.inputs) {
-      console.log(input.name, input.value);
-	  }
-    */
   }
   
 }
@@ -401,127 +492,47 @@ class CombineCustomizer extends AnimationCustomizer {
 }
 
 
-// Set up defaults
-// TODO: Load already saved data from wemos d1 mini
 
-var customizers = [];
-var animationCustomizer = new AnimationCustomizer();
-animationCustomizer.setup();
-customizers.push(animationCustomizer);
-/*
-var combineCustomizer = new CombineCustomizer();
-combineCustomizer.setup();
-customizers.push(combineCustomizer);
-*/
+let settings;// = JSON.parse(jsonFoo);
 
 
-let currentPin = 1;
-let activeCustomizer = customizers[0];
+d = new DisplayManager();
 
-function pinChanged() {
-  activeCustomizer.hide();
-  // Set current function and customizer for the pin
-  document.getElementsByName("function")[0].value = settings["pins"][currentPin-1]["function"];
-  console.log("customizer index: ", settings["pins"][currentPin-1]["function"]);
-  activeCustomizer = customizers[settings["pins"][currentPin-1]["function"]];
-  // Set all customizer values
-  for (let customizer of customizers) {
-    // Set the customizer values
-    for (let input of customizer.inputs) {
-      if ("color1" === input.name) {
-        // Hack it for now
-        input.value = settings["pins"][currentPin-1]["colors"][0];
-      } else {
-        input.value = settings["pins"][currentPin-1][input.name];
-      }
-      console.log(input.name, input.value);
-    }
-  }
-  activeCustomizer.show();
-}
+// Get latest data on page load using JSON asyncronous request
+// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
+fetch('settings.json')
+  .then(response => response.json())
+  .then((response) => {
+    console.log(response);
+    console.log(response['crc']);
+    settings = response;
+    console.log(settings['crc']);
+    d.setGeneralSettings();
+    d.setPin(0);
+  });
+
 
 function onPinSelection(e) {
-  currentPin = e.target.value;
-  pinChanged();
+  d.setPin(e.target.value);
 }
-
-
-
-/*
-
-fetch('settings.json').then(function(response) {
-  //return response.json();
-  // Maybe this is helpful? https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON
-  JSON.parse();     // input  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-  JSON.stringify(); // output https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
-}).
-
-*/
-
 
 
 // Set pin handler
 document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
 
-function onCustomizerInput(e) {
-  // Here's some docs to handle e: https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oninput
-  // Publish current pin and property
-  // I like it for it's simplicity and efficiency. Keeping it for now
-  fetch(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
-  //console.log(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
-  
-
-  // Alternatively one could also publish all details of the
-  // currently active customizer
-  //activeCustomizer.publish();
-
-  // Or publish the pin as JSON
-  // JSON.stringify(settings["pins"][0])
-
-  // Or walk up the tree just for that property
-  // https://stackoverflow.com/a/61693085/931280
-} 
 
 // Probably want to refactor this and the above to be together
 function onGeneralInput(e) {
   fetch(`/set?${e.target.id}=${e.target.value}`);
-  //console.log(`/set?${e.target.id}=${e.target.value}`);
+  console.log(`/set?${e.target.id}=${e.target.value}`);
 }
-
-
-
 
 // Selector on change
 const selectElement = document.querySelector('.pattern');
-document.getElementsByName("function")[0].addEventListener('change', (event) => {
-  // Hide current customizer
-  activeCustomizer.hide();
-  customizers.forEach(c => c.hide());
-  activeCustomizer = customizers[event.target.value];
-  activeCustomizer.show();
+document.getElementsByName("function")[0].addEventListener('change', (e) => {
+  d.setCurrentCustomizer(e.target.value);
 });
 
-/*
-
-Can't do without setting the size to be non-0 or non-1 and annoying! I think it's fine for mobile users
-
-// Thanks Mozilla Dev! https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event
-function onPatternMouseOver(e) {
-  // Need to set the current pattern
-  console.log(e.target.value);
-  // And then publish it. Maybe only it? Hmm...
-  activeCustomizer.publish();
-}
-
-// Pattern selector children (options)
-// Spreader??? https://stackoverflow.com/a/35970005/931280
-[...document.getElementsByName("pattern")[0].children].forEach(function (child) {
-  child.onmouseover = onPatternMouseOver;
-});
-
-document.getElementsByName("pattern")[0].onmouseover = onPatternMouseOver;
-
-*/
 
 </script>
 </body>

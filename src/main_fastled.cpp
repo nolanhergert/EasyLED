@@ -23,17 +23,17 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define INITIAL_NUM_LEDS 25
-#define TOTAL_NUM_LEDS    NUM_PINS*INITIAL_NUM_LEDS 
-uint32 patterns[NUM_PINS];
-uint32 offsets[NUM_PINS];
-uint32 lengths[NUM_PINS];
-CRGB colors[NUM_PINS][NUM_COLORS];
+#define TOTAL_NUM_LEDS    MAX_PINS*INITIAL_NUM_LEDS 
+uint32 patterns[MAX_PINS];
+uint32 offsets[MAX_PINS];
+uint32 lengths[MAX_PINS];
+CRGB colors[MAX_PINS][NUM_COLORS];
 CRGB leds[TOTAL_NUM_LEDS];
 
+// Actual number of pins from settings
+uint8 numPins;
 
 
-
-#define DEFAULT_BRIGHTNESS (uint8)255 // can be dynamically changed though
 #define FRAMES_PER_SECOND  200
 
 
@@ -146,7 +146,7 @@ void RecomputeOffsets() {
   uint i = 0;
   // Recompute offsets
   offsets[0] = 0;
-  for (i = 1; i < NUM_PINS; i++) {
+  for (i = 1; i < numPins; i++) {
     offsets[i] = offsets[i-1] + lengths[i-1];
   }
 } 
@@ -162,11 +162,9 @@ void SetLedStripParameters() {
     i++;
 		pCur = pCur->next();
 	}
-  
-  
 }
 
-void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[5]) {
+void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[NUM_COLORS]) {
   // Don't change lengths just yet, need to load in
   // saved values
   //lengths[pin] = length;
@@ -205,33 +203,31 @@ void AddNewLedStrip(int pin, int offset, int length) {
 }
 
 uint8 initialStartupBrightness = 0;
-uint8 initialStartupBrightnessMax = DEFAULT_BRIGHTNESS;
+uint8 initialStartupBrightnessMax;
+
 
 //static const 
-void setup_FastLED() {
+void setup_FastLED(const Settings *pSettings) {
 
   int i = 0;
-
-  // Maybe want to use this?! Make sure it's over the combination of all strips
-  // Or just do it manually with patterns you know already? Not sure why, just lower
-  // the brightness as you go...
-  //FastLED.setMaxPowerInVoltsAndMilliamps(4, 1000);
-
-  
-  
-  // set master brightness control
   FastLED.setBrightness(initialStartupBrightness);
 
-  // Todo: LOAD VALUES FROM EEPROM
-  //  * initialStartupBrightnessMax
+  // TODO:
+  //FastLED.setMaxPowerInMilliWatts(pSettings->general.maxPowerMilliwatts);
+
+  initialStartupBrightnessMax = pSettings->general.brightness;
+  
+  numPins = pSettings->general.numPins;
   // And save them when changed without wearing out eeprom during testing.
-  for (i = 0; i < NUM_PINS; i++) {
-    lengths[i] = INITIAL_NUM_LEDS;
+  for (i = 0; i < numPins; i++) {
+    lengths[i] = pSettings->pins[i].num_leds;
+    offsets[i] = pSettings->pins[i].offset;
+    patterns[i] = pSettings->pins[i].pattern;
   }
+
   RecomputeOffsets();
-  for (i = 0; i < NUM_PINS; i++) {
+  for (i = 0; i < numPins; i++) {
     AddNewLedStrip(i, offsets[i], lengths[i]);
-    patterns[i] = i % ARRAY_SIZE( gPatterns);
   }  
 }
 
@@ -248,8 +244,7 @@ void loop_FastLED()
       FastLED.setBrightness(initialStartupBrightness++);
     }
   }
-
-  for (i = 0; i < NUM_PINS; i++) {
+  for (i = 0; i < numPins; i++) {
     // Call the current pattern function once, updating the 'leds' array
     gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
   }
@@ -266,14 +261,14 @@ void loop_FastLED()
     fadeToBlackBy( leds, TOTAL_NUM_LEDS, 255);
     FastLED.show();
 
-    for (i = 0; i < NUM_PINS; i++) {
+    for (i = 0; i < numPins; i++) {
       lengths[i] = (lengths[i] + 1)%TEMP_NUM_LEDS;
     }
     RecomputeOffsets();
 
     // No performance difference between addLeds and setLeds, surprisingly
     // And no additional entries on linked list
-    for (i = 0; i < NUM_PINS; i++) {
+    for (i = 0; i < numPins; i++) {
       //AddNewLedStrip(i, offsets[i], lengths[i]);
     }
     SetLedStripParameters();
