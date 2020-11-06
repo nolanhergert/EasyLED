@@ -20,6 +20,9 @@ Minimum Viable Product
   * Limit current
     * Have a setting for it, but need to have a good default strip length. Since fastled can't tell whether display is actually driving or not
 
+v1.0 
+  * Double check on older Android, iPhone and a Windows device emulator? Maybe old IE and safari as well. I think it *should* work, but maybe iterators won't work.
+
 Somehow wled.me works on android?
 
 === "Good" Patterns from WLED ===
