@@ -22,6 +22,7 @@ Minimum Viable Product
 
 v1.0 
   * Double check on older Android, iPhone and a Windows device emulator? Maybe old IE and safari as well. I think it *should* work, but maybe iterators won't work.
+  * Talk with various advisors as whether it's wise to work on it to full product or not.
 
 Somehow wled.me works on android?
 
