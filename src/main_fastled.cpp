@@ -233,7 +233,6 @@ void setup_FastLED(const Settings *pSettings) {
 
 
 
-
 void loop_FastLED()
 {
   int i = 0;
@@ -250,10 +249,12 @@ void loop_FastLED()
   }
 
   // send the 'leds' array out to the actual LED strip
-  FastLED.show();  
+  FastLED.show();
+  
   // insert a delay (if needed) to keep the framerate modest
   FastLED.delay(1000/FRAMES_PER_SECOND); 
   gHue++;
+
 /*
 
   EVERY_N_MILLISECONDS( 5 ) {

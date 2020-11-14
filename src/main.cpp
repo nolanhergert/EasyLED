@@ -243,13 +243,15 @@ void setup() {
   
 }
 
+bool WifiOn = 1;
+bool FastLEDOn = 1;
 uint16 b = 0;
 int8 inc = 1;
 void loop() {
   server.handleClient();
   
   dnsServer.processNextRequest();
-  loop_FastLED();
+  
 
 /*
   // Simple pulse for main blue LED
@@ -262,6 +264,20 @@ void loop() {
   // Also analogWriteFreq(); Default is 1KHz
   delay(2);
   */
-  
+  if (FastLEDOn == 1) {
+    loop_FastLED();
+  } 
+  EVERY_N_SECONDS(5) {
+    FastLEDOn = 1 - FastLEDOn;
+  }
+
+  EVERY_N_SECONDS(20) {
+    if (WifiOn == 1) {
+      WiFi.mode(WIFI_OFF);
+    } else {
+      WiFi.mode(WIFI_AP);
+    }
+    WifiOn = 1 - WifiOn;
+  }
 
 }
