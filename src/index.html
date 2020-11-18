@@ -342,6 +342,7 @@ function onAdjusterClick(e) {
   } else {
     v.value--;
   }
+  d.onCustomizerInput(v.name, v.value);
 }
 
 var adjusters = document.getElementsByClassName('adjuster');
