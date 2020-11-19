@@ -23,12 +23,11 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define INITIAL_NUM_LEDS 25
-#define TOTAL_NUM_LEDS    MAX_PINS*INITIAL_NUM_LEDS 
-uint32 patterns[MAX_PINS];
+#define TOTAL_NUM_LEDS    MAX_PINS*INITIAL_NUM_LEDS
 uint32 offsets[MAX_PINS];
 uint32 lengths[MAX_PINS];
-CRGB colors[MAX_PINS][NUM_COLORS];
 CRGB leds[TOTAL_NUM_LEDS];
+
 
 // Actual number of pins from settings
 uint8 numPins;
@@ -39,66 +38,66 @@ uint8 numPins;
 
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
   
-void rainbow(CRGB LedsSubset[], uint32 LedsSubsetCount) {
-  fill_rainbow( LedsSubset, LedsSubsetCount, gHue, 7);
+void rainbow(const EasyLEDPin *pPin) {
+  fill_rainbow( &leds[offsets[pPin->index]], pPin->num_leds, gHue, 7);
 }
 
-void glitter(CRGB LedsSubset[], uint32 LedsSubsetCount, fract8 chanceOfGlitter) {
+void glitter(const EasyLEDPin *pPin, fract8 chanceOfGlitter) {
   if( random8() < chanceOfGlitter) {
-    LedsSubset[ random16(LedsSubsetCount) ] += CRGB::White;
+    leds[offsets[pPin->index] + random16(pPin->num_leds)] += CRGB::White;
   }
 }
 
-void rainbowWithGlitter(CRGB LedsSubset[], uint32 LedsSubsetCount) 
+void rainbowWithGlitter(const EasyLEDPin *pPin) 
 {
   // FastLED's built-in rainbow generator
-  rainbow(LedsSubset, LedsSubsetCount);
+  rainbow(pPin);
   // Plus glitter!
-  glitter(LedsSubset, LedsSubsetCount, 80);
+  glitter(pPin, 80);
 
 }
 
 
-void confetti(CRGB LedsSubset[], uint32 LedsSubsetCount) 
+void confetti(const EasyLEDPin *pPin) 
 {
   // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( LedsSubset, LedsSubsetCount, 10);
-  int pos = random16(LedsSubsetCount);
-  LedsSubset[pos] += CHSV( gHue + random8(64), 200, 255);
+  fadeToBlackBy( &leds[offsets[pPin->index]], pPin->num_leds, 10);
+  int pos = random16(pPin->num_leds);
+  leds[offsets[pPin->index] + pos] += CHSV( gHue + random8(64), 200, 255);
 }
 
-void sinelon(CRGB LedsSubset[], uint32 LedsSubsetCount)
+void sinelon(const EasyLEDPin *pPin)
 {
   // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( LedsSubset, LedsSubsetCount, 20);
-  int pos = beatsin16( 13, 0, LedsSubsetCount-1 );
-  LedsSubset[pos] += CHSV( gHue, 255, 192);
+  fadeToBlackBy( &leds[offsets[pPin->index]], pPin->num_leds, 20);
+  int pos = beatsin16( 13, 0, pPin->num_leds-1 );
+  leds[offsets[pPin->index] + pos] += CHSV( gHue, 255, 192);
 }
 
-void bpm(CRGB LedsSubset[], uint32 LedsSubsetCount)
+void bpm(const EasyLEDPin *pPin)
 {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t BeatsPerMinute = 62;
   CRGBPalette16 palette = PartyColors_p;
   uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for( uint i = 0; i < LedsSubsetCount; i++) { //9948
-    LedsSubset[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+  for( uint i = 0; i < pPin->num_leds; i++) { //9948
+    leds[offsets[pPin->index] + i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
   }
 }
 
-void juggle(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+void juggle(const EasyLEDPin *pPin) {
   // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy( LedsSubset, LedsSubsetCount, 20);
+  fadeToBlackBy( &leds[offsets[pPin->index]], pPin->num_leds, 20);
   byte dothue = 0;
   for( uint i = 0; i < 8; i++) {
-    LedsSubset[beatsin16( i+7, 0, LedsSubsetCount-1 )] |= CHSV(dothue, 200, 255);
+    leds[offsets[pPin->index] + beatsin16( i+7, 0, pPin->num_leds-1 )] |= CHSV(dothue, 200, 255);
     dothue += 32;
   }
 }
 
-void color(CRGB LedsSubset[], uint32 LedsSubsetCount) {
-  for( uint i = 0; i < LedsSubsetCount; i++) {
-    LedsSubset[i] = CHSV(170,255,255);
+void color(const EasyLEDPin *pPin) {
+  for( uint i = 0; i < pPin->num_leds; i++) {
+    leds[offsets[pPin->index] + i] = pPin->colors[0];
   }
 }
 
@@ -106,13 +105,13 @@ void color(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 
 CRGBPalette16 currentPalette(CRGB::Black);
 CRGBPalette16 targetPalette(OceanColors_p);
-void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
+void fillnoise8(const EasyLEDPin *pPin) {
 
   #define scale 30                                                          // Don't change this programmatically or everything shakes.
   
-  for(uint32 i = 0; i < LedsSubsetCount; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
+  for(uint32 i = 0; i < pPin->num_leds; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
     uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
-    LedsSubset[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    leds[offsets[pPin->index] + i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
   }
 
   
@@ -135,7 +134,7 @@ void fillnoise8(CRGB LedsSubset[], uint32 LedsSubsetCount) {
 
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
-typedef void (*SimplePatternList[])(CRGB LedsSubset[], uint32 LedsSubsetCount);
+typedef void (*SimplePatternList[])(const EasyLEDPin *pPin);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
 SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, color, fillnoise8, juggle, confetti, sinelon, bpm };
 
@@ -164,15 +163,16 @@ void SetLedStripParameters() {
 	}
 }
 
-void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[NUM_COLORS]) {
-  // Don't change lengths just yet, need to load in
-  // saved values
-  //lengths[pin] = length;
-  Serial.print("Changing pin ");
-  Serial.print(pin);
-  Serial.print(" pattern to: ");
-  Serial.println(pattern);
-  patterns[pin] = pattern;
+void ModifyLedStrip(const EasyLEDPin *pPin) {
+  // Most settings will get picked up automatically in
+  // loop_FastLED(), but here are a few things that need
+  // to get re-initialized
+  lengths[pPin->index] = pPin->num_leds;
+  
+  // Set all leds in global array to black
+  FastLED.clear();
+  FastLED.show();
+  
   RecomputeOffsets();
   SetLedStripParameters();
 }
@@ -222,7 +222,6 @@ void setup_FastLED(const Settings *pSettings) {
   for (i = 0; i < numPins; i++) {
     lengths[i] = pSettings->pins[i].num_leds;
     offsets[i] = pSettings->pins[i].offset;
-    patterns[i] = pSettings->pins[i].pattern;
   }
 
   RecomputeOffsets();
@@ -234,7 +233,7 @@ void setup_FastLED(const Settings *pSettings) {
 
 
 
-void loop_FastLED()
+void loop_FastLED(const Settings *pSettings)
 {
   int i = 0;
 
@@ -246,7 +245,7 @@ void loop_FastLED()
   }
   for (i = 0; i < numPins; i++) {
     // Call the current pattern function once, updating the 'leds' array
-    gPatterns[patterns[i]](&leds[offsets[i]], lengths[i]);
+    gPatterns[pSettings->pins[i].pattern](&(pSettings->pins[i]));
   }
 
   // send the 'leds' array out to the actual LED strip
@@ -254,27 +253,6 @@ void loop_FastLED()
   // insert a delay (if needed) to keep the framerate modest
   FastLED.delay(1000/FRAMES_PER_SECOND); 
   gHue++;
-/*
-
-  EVERY_N_MILLISECONDS( 5 ) {
-    // Set all pixels to black
-    fadeToBlackBy( leds, TOTAL_NUM_LEDS, 255);
-    FastLED.show();
-
-    for (i = 0; i < numPins; i++) {
-      lengths[i] = (lengths[i] + 1)%TEMP_NUM_LEDS;
-    }
-    RecomputeOffsets();
-
-    // No performance difference between addLeds and setLeds, surprisingly
-    // And no additional entries on linked list
-    for (i = 0; i < numPins; i++) {
-      //AddNewLedStrip(i, offsets[i], lengths[i]);
-    }
-    SetLedStripParameters();
-    //Serial.println(ESP.getFreeHeap());
-  }
-  */
   
 }
 

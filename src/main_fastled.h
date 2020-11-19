@@ -6,8 +6,8 @@
 #include <settings.h>
 
 void setup_FastLED(const Settings *pSettings);
-void loop_FastLED();
+void loop_FastLED(const Settings *pSettings);
 
-void ModifyLedStrip(int pin, int length, int pattern, CRGB colors[5]);
+void ModifyLedStrip(const EasyLEDPin *pPin);
 
 #endif // _MAIN_FASTLED_H_

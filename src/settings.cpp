@@ -8,20 +8,20 @@
 #define DEFAULT_BRIGHTNESS (uint8)255 // can be dynamically changed though
 #define DEFAULT_MAX_MILLIWATTS 4 * 1000 // 4V * 1000mA, need to play with this some more
 
-// "#RRGGBB" -> 0xRRGGBB
+// "RRGGBB" -> 0xRRGGBB
 CRGB HTMLColorCodeToCRGB(const String& s) {
   // Thanks Michael! https://stackoverflow.com/a/3409211/931280
   // WARNING: no sanitization or error-checking whatsoever
   CRGB c;
-  sscanf(s.c_str(), "#%2hhx%2hhx%2hhx", &c.raw[0], &c.raw[1], &c.raw[2]);
+  sscanf(s.c_str(), "%2hhx%2hhx%2hhx", &c.raw[0], &c.raw[1], &c.raw[2]);
   return c;
 }
 
-// 0xRRGGBB -> "#RRGGBB"
+// 0xRRGGBB -> "RRGGBB"
 void CRGBToHtmlColorCode(CRGB c, String& s) {
   // Thanks Doug! https://stackoverflow.com/a/2342176/931280
   char temp[8];
-  snprintf(temp, sizeof(temp), "#%02x%02x%02x", c.raw[0], c.raw[1], c.raw[2]);
+  snprintf(temp, sizeof(temp), "%02x%02x%02x", c.raw[0], c.raw[1], c.raw[2]);
   s = temp;
 }
 

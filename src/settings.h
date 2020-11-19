@@ -105,7 +105,7 @@ struct EasyLEDPin {
   uint8 function; // >0
   uint16 pattern; // >0
   uint16 num_leds;// >0
-  sint16 offset;  
+  sint16 offset;  // relative to another pin
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
   // When adding fields:

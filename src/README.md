@@ -2,11 +2,11 @@ What features do people care about! Maybe just get a minimum viable product out 
 
 Minimum Viable Product
   * DONE! Select from available patterns
-  * Save preferences across power cycle and firmware update
+  * DONE! Save preferences across power cycle and firmware update
      * Setting one value (say pattern) doesn't change other values in pin struct. The whole pin struct is sent in to FastLED updater. Need to remove comment in that updater
      that prevents length from getting updated
      * Maybe can just use eeprom rotate, don't need the full flashee script.
-  * Select preferred colors and have them expressed in patterns?
+  * DONE-ish! Select preferred colors and have them expressed in patterns?
   * Show estimated power usage, ideally "how long battery will last". Need to input battery size.
   * DONE! Optionally encase in resin for weatherproofing. Maybe have longer usb cable? 
     * DONE! Coat pin ends with hot glue until ready to use?

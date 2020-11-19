@@ -65,43 +65,36 @@
 struct Settings settings;
 
 DNSServer dnsServer;
-
-void UpdateLedStrip(EasyLEDPin *pin) {
-  ModifyLedStrip(pin->index, pin->num_leds, pin->pattern, pin->colors);
-}
-
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
 // Here for now since it has appendages to multiple modules
 void ParsePinVariable(EasyLEDPin *pin, String argName, String argValue) {
+  /*
   Serial.print("Pin: ");
   Serial.print(pin->index);
   Serial.print(" Parsing: ");
   Serial.print(argName);
   Serial.print(", ");
   Serial.println(argValue);
+  */
   if (argName == "function") {
     pin->function = argValue.toInt();
     // TODO: Switch on function
   } else if (argName == "num_leds") {
     pin->num_leds = argValue.toInt();
-    UpdateLedStrip(pin);
+    ModifyLedStrip(pin);
   } else if (argName == "pattern") {
     pin->pattern = argValue.toInt();
-    UpdateLedStrip(pin);
   } else if (argName == "color0") {
     // Thanks Michael! https://stackoverflow.com/a/3409211/931280
     // WARNING: no sanitization or error-checking whatsoever
     
     int pos = 0;
     for (int count = 0; count < 3; count++) {
-      // 1 = Skip the "#" symbol
-      sscanf(&(argValue[1+pos]), "%2hhx", &(pin->colors[0].raw[count]));
+      sscanf(&(argValue[pos]), "%2hhx", &(pin->colors[0].raw[count]));
       pos += 2;
     }
-    UpdateLedStrip(pin);
-    //pin->colors[0].red = std::stoul(argValue[1], nullptr, 16);
   } else {
     Serial.print("Match not found for: ");
     Serial.println(argName);
@@ -135,11 +128,9 @@ void ParseURLArgs(ESP8266WebServer& server) {
     // How much do we want to reset? Wifi? Separate function?
     // For now just do fast led
     setup_FastLED(&settings);
-    loop_FastLED();
 
   } else if (server.argName(0) == "pin") {
     pin = server.arg(0).toInt();
-    Serial.println(pin);
     for (int i = 1; i < server.args(); i++) {
       ParsePinVariable(&(settings.pins[pin]), server.argName(i), server.arg(i));
     }
@@ -227,8 +218,8 @@ void setup() {
   
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now
-    ParseURLArgs(server);
     server.send(200);
+    ParseURLArgs(server);
   });
 
   server.onNotFound(handleNotFound);
@@ -249,7 +240,7 @@ void loop() {
   server.handleClient();
   
   dnsServer.processNextRequest();
-  loop_FastLED();
+  loop_FastLED(&settings);
 
 /*
   // Simple pulse for main blue LED

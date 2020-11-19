@@ -4,7 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name = "viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0">
 
-
 <style>
 
 body {
@@ -175,7 +174,7 @@ Pin
 
     <p></p>
 	<label for="color0">Select your favorite color:</label>
-	<input type="color" id="color0" name="color0" value="#ff0000">
+  <input type="color" id="color0" name="color0" value="#ff0000">
 
 </div>
 
@@ -210,24 +209,24 @@ Pin
 <script>
 let jsonFoo = `{
   "version": "00.01.00.0000",
-  "writeCount": 7,
-  "crc": 1791675105,
+  "writeCount": 19,
+  "crc": 599903706,
   "numPins": 8,
-  "brightness": 255,
+  "brightness": 35,
   "maxPowerMilliwatts": 4000,
   "pins": [
     {
       "index": 0,
       "function": 0,
-      "pattern": 0,
-      "num_leds": 10,
+      "pattern": 7,
+      "num_leds": 16,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "ff00ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -237,11 +236,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -251,11 +250,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -265,11 +264,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -279,11 +278,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -293,11 +292,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -307,11 +306,11 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000",
+        "000000"
       ]
     },
     {
@@ -321,11 +320,10 @@ let jsonFoo = `{
       "num_leds": 10,
       "offset": 0,
       "colors": [
-        "#0000ff",
-        "#000000",
-        "#000000",
-        "#000000",
-        "#000000"
+        "0000ff",
+        "000000",
+        "000000",
+        "000000"
       ]
     }
   ]
@@ -419,7 +417,7 @@ class DisplayManager {
     for (let input of this.customizers[this.activeCustomizerIndex].inputs) {
       if ("color0" === input.name) {
         // Hack multiple colors for now, only do one
-        input.value = pin["colors"][0];
+        input.value = '#' + pin["colors"][0];
       } else {
         input.value = pin[input.name];
       }
@@ -432,6 +430,9 @@ class DisplayManager {
     // Update our internal copy of settings
     let pin = settings["pins"][this.currentPinIndex];
     if (name == "color0") {
+      // Remove pound sign ("#") from hex color since it is
+      // special in a URL
+      value = value.slice(1);
       pin["colors"][0] = value;
     } else {
       pin[name] = value;
@@ -441,7 +442,7 @@ class DisplayManager {
     // current pin and property
     // I like it for it's simplicity and efficiency. Keeping it for now
     fetch(`/set?pin=${this.currentPinIndex};${name}=${value}`);
-    //console.log(`/set?pin=${currentPin};${e.target.name}=${e.target.value}`);
+    //console.log(`/set?pin=${this.currentPinIndex};${name}=${value}`);
     
     // Alternatively one could also publish all details of the
     // currently active customizer
@@ -504,7 +505,7 @@ class CombineCustomizer extends AnimationCustomizer {
 
 
 
-let settings; // = JSON.parse(jsonFoo);
+let settings = JSON.parse(jsonFoo);
 
 
 d = new DisplayManager();
@@ -543,6 +544,7 @@ const selectElement = document.querySelector('.pattern');
 document.getElementsByName("function")[0].addEventListener('change', (e) => {
   d.setCurrentCustomizer(e.target.value);
 });
+
 
 
 </script>
