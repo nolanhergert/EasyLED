@@ -160,10 +160,12 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println();
+  /*
+
   // Read in initial settings
   settings.read();
   Serial.print("Configuring access point...");
-  /* You can remove the password parameter if you want the AP to be open. */
+  // You can remove the password parameter if you want the AP to be open.
   WiFi.softAP(SSID);
 
 
@@ -173,6 +175,7 @@ void setup() {
 
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, DNS_NAME, WiFi.softAPIP());
+
 
 
   // Allow http updates
@@ -227,22 +230,26 @@ void setup() {
 
   server.begin();
   Serial.println("HTTP server started");
+  setup_FastLED(&settings);
+  */
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  setup_FastLED(&settings);
+
   
 }
 
 uint16 b = 0;
 int8 inc = 1;
 void loop() {
+  /*
   server.handleClient();
   
   dnsServer.processNextRequest();
   loop_FastLED(&settings);
+  */
 
-/*
+
   // Simple pulse for main blue LED
   if (b == PWMRANGE) {
     inc = -1;
@@ -252,7 +259,9 @@ void loop() {
   analogWrite(LED_BUILTIN,b += inc);
   // Also analogWriteFreq(); Default is 1KHz
   delay(2);
-  */
   
+  EVERY_N_MILLISECONDS( 1000 ) {
+    Serial.println("Hello!");
+  }
 
 }
