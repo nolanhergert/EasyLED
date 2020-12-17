@@ -140,17 +140,19 @@ void Settings::deserialize(const String &json) {
 void Settings::setDefaults() {
   // Zero out Settings struct
   //this = {};
+
+  // Just do a full reset for now?
   // Save off a few fields that shouldn't be changed before zeroing
-  uint16 numPins = general.numPins;
-  uint16 writeCount = general.writeCount;
+  //uint16 numPins = general.numPins;
+  //uint16 writeCount = general.writeCount;
 
 
   memset(this, 0, sizeof(*this));
 
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
-  general.writeCount = writeCount;
-  general.numPins = numPins;
+  general.writeCount = 0;
+  general.numPins = MAX_PINS;
   general.brightness = DEFAULT_BRIGHTNESS;
   general.maxPowerMilliwatts = DEFAULT_MAX_MILLIWATTS;
   
@@ -202,9 +204,9 @@ bool Settings::IO(bool IsWriting) {
   general.crc = 0;
 
   crc = crc32Buffer(this, sizeof(*this));
-  if (!IsWriting && crc != crcCopy) {
-    // Reading from EEPROM and crc doesn't check out, create defaults and
-    // write to flash
+  if (!IsWriting && (crc != crcCopy || general.numPins > MAX_PINS)) {
+    // Reading from EEPROM and crc or data doesn't check out.
+    // Create defaults and write to flash
     Serial.print("CRC didn't align. Creating defaults!\n");
     setDefaults(); // zeroes entire struct, including crc
     general.crc = crc32Buffer(this, sizeof(*this));
@@ -233,8 +235,9 @@ bool Settings::IO(bool IsWriting) {
         goto Finish;
       }
     }
+    Serial.println("Success in writing to eeprom!");
   }
-  Serial.println("Success in writing to eeprom! Inside function");
+  
   rc = RC_SUCCESS;
 
 Finish:
