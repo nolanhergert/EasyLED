@@ -89,7 +89,7 @@ void ParsePinVariable(EasyLEDPin *pin, String argName, String argValue) {
   } else if (argName == "color0") {
     // Thanks Michael! https://stackoverflow.com/a/3409211/931280
     // WARNING: no sanitization or error-checking whatsoever
-    
+
     int pos = 0;
     for (int count = 0; count < 3; count++) {
       sscanf(&(argValue[pos]), "%2hhx", &(pin->colors[0].raw[count]));
@@ -160,7 +160,7 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println();
-  /*
+
 
   // Read in initial settings
   settings.read();
@@ -203,10 +203,10 @@ void setup() {
     //server.
     //DeserializationError err = deserializeJson(doc, input);
           if (server.hasArg("plain")== false){ //Check if body received
- 
+
             server.send(200, "text/plain", "Body not received");
             return;
- 
+
       }
       String json;
       settings.serialize(json);
@@ -215,10 +215,11 @@ void setup() {
              message += server.arg("plain");
              message += "\n";
              message += json;
- 
+
       server.send(200, "text/plain", message);
   });
-  
+
+
   server.on("/set", HTTP_GET, []() {
     // Very simple parsing for now
     server.send(200);
@@ -227,30 +228,30 @@ void setup() {
 
   server.onNotFound(handleNotFound);
 
-
   server.begin();
   Serial.println("HTTP server started");
+
   setup_FastLED(&settings);
-  */
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  
+
 }
 
 uint16 b = 0;
 int8 inc = 1;
 void loop() {
-  /*
+
   server.handleClient();
-  
+
   dnsServer.processNextRequest();
   loop_FastLED(&settings);
-  */
 
 
+/*
   // Simple pulse for main blue LED
+  // Requires pin 4 to not be used by FastLED
   if (b == PWMRANGE) {
     inc = -1;
   } else if (b == 0) {
@@ -259,9 +260,10 @@ void loop() {
   analogWrite(LED_BUILTIN,b += inc);
   // Also analogWriteFreq(); Default is 1KHz
   delay(2);
-  
+
   EVERY_N_MILLISECONDS( 1000 ) {
     Serial.println("Hello!");
   }
+  */
 
 }
