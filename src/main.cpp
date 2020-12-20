@@ -59,10 +59,16 @@
 
 #define SSID "EasyLED"
 #define DNS_NAME "easyled.local"
+#define WIFI_STARTUP_TIMEOUT_SECS 120
+
+
 // No password for now
 
 
 struct Settings settings;
+// Used to determine if we should shut off the wifi
+boolean wifiAccessed = false;
+boolean wifiTimeoutElapsed = false;
 
 DNSServer dnsServer;
 ESP8266WebServer server(80);
@@ -235,8 +241,6 @@ void setup() {
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-
-
 }
 
 uint16 b = 0;
@@ -248,6 +252,25 @@ void loop() {
   dnsServer.processNextRequest();
   loop_FastLED(&settings);
 
+  EVERY_N_SECONDS(1) {
+    // Only want to run the below code if the timeout is not elapsed
+    if (wifiTimeoutElapsed == false) {
+      if (WiFi.softAPgetStationNum() > 0) {
+        wifiAccessed = true;
+      }
+
+      if (millis() > (WIFI_STARTUP_TIMEOUT_SECS * 1000)) {
+        wifiTimeoutElapsed = true;
+        if (wifiAccessed == false) {
+          // Turn off wifi
+          Serial.println("Disabling wifi after 120 seconds of unuse at startup");
+          WiFi.mode( WIFI_OFF );
+          WiFi.forceSleepBegin();
+          delay( 1 );
+        }
+      }
+    }
+  }
 
 /*
   // Simple pulse for main blue LED

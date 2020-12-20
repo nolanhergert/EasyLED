@@ -11,15 +11,12 @@ Minimum Viable Product
   * DONE! Optionally encase in resin for weatherproofing. Maybe have longer usb cable?
     * DONE! Coat pin ends with hot glue until ready to use?
     * DONE! How to make mold that is reusable
-  * Wifi turns off after N (60?) seconds if unused for security and power consumption?
+  * DONE! Wifi turns off after N (60?) seconds if unused for security and power consumption?
   * DONE! Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
     * Make unique wifi name using mac address like wled. Double check wled support of multiple strips?
   * Serial number, epoxy type, case design, num pins, in flash eeprom.
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think. User can pick what to do (off/on/fade (pick a time period in seconds?))
-  * BUG:
-    * Browser seems to be caching the old form values instead of using the current ones? Maybe a nocache flag
-    * Hopefully the above will fix this issue, where you need to *change* a field in order for the change to take place? Hard to describe.
   * Limit current
     * Have a setting for it, but need to have a good default strip length. Since fastled can't tell whether display is actually driving or not
 
