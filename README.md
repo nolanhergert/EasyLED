@@ -1,8 +1,14 @@
 # LedStripController
 Main use cases:
-  * Control multiple led strips from one controller
+  * Control multiple independent led strips from one controller without soldering!
   * Portable outdoor control and mounting (optional)
   * Very little setup required!
+
+# Instructions
+
+# Behavior
+  * Wifi is set to turn off after 120 seconds if not accessed on startup. If the wifi is accessed, it will continue to stay on until power is removed.
+  * Click "Save Changes" to persist the settings to the microcontroller permanent storage (flash).
 
 Works best with Platform.io.
 
