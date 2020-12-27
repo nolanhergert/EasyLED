@@ -13,7 +13,8 @@ Minimum Viable Product
     * DONE! How to make mold that is reusable
   * DONE! Wifi turns off after N (60?) seconds if unused for security and power consumption?
   * DONE! Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
-    * Make unique wifi name using mac address like wled. Double check wled support of multiple strips?
+    * DONE! Make unique wifi name using mac address like wled.
+    * DONE! Double check wled support of multiple strips? Added to 1.0, as it's not done yet on WLED side.
   * Instructions for setup and customization
   * GUI should show 4 pins appropriately
   * Serial number, epoxy type, case design, num pins, in flash eeprom.
@@ -24,7 +25,8 @@ Minimum Viable Product
 
 v1.0
   * Double check on older Android, iPhone and a Windows device emulator? Maybe old IE and safari as well. I think it *should* work, but maybe iterators won't work.
-  * Talk with various advisors as whether it's wise to work on it to full product or not.
+  * Talk with various advisors as whether it's wise to bring it to a full product or just leave as a "kit".
+  * WLED multi led strip support? https://github.com/Aircoookie/WLED/issues/104
 
 Somehow wled.me works on android?
 

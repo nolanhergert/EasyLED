@@ -57,7 +57,7 @@
 
 #include <EEPROM.h>
 
-#define SSID "EasyLED"
+#define SSID_PREFIX "EasyLED"
 #define DNS_NAME "easyled.local"
 #define WIFI_STARTUP_TIMEOUT_SECS 120
 #define LED_BUILTIN_BREATHE_PERIOD_SECS 6
@@ -173,7 +173,13 @@ void setup() {
   settings.read();
   Serial.print("Configuring access point...");
   // You can remove the password parameter if you want the AP to be open.
-  WiFi.softAP(SSID);
+
+  String mac = WiFi.macAddress();
+  mac.replace(":","");
+  String ssid = SSID_PREFIX + mac.substring(8);
+  // Append latter mac address bytes onto the end for a persistent non-colliding ssid name
+  Serial.println(ssid);
+  WiFi.softAP(ssid);
 
 
   IPAddress myIP = WiFi.softAPIP();
@@ -237,7 +243,9 @@ void setup() {
   server.onNotFound(handleNotFound);
 
   server.begin();
+  delay(1000);
   Serial.println("HTTP server started");
+
 
 
   pinMode(LED_BUILTIN, OUTPUT);

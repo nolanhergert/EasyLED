@@ -245,7 +245,7 @@ let jsonFoo = `{
     },
     {
       "index": 2,
-      "function": 0,
+      "function": 255,
       "pattern": 2,
       "num_leds": 10,
       "offset": 0,
@@ -385,6 +385,12 @@ class DisplayManager {
 
   setGeneralSettings() {
     document.getElementById("brightness").value = settings["brightness"];
+    for (let i = 0; i < settings["numPinStructsInSettings"]; i++) {
+      if (settings["pins"][i]["function"] == 0xFF) {
+        console.log("Pin " + (settings["pins"][i]["index"]+1) + " disabled");
+      }
+    }
+    this.setPin(0);
   }
 
   setPin(pin) {
@@ -508,20 +514,23 @@ class CombineCustomizer extends AnimationCustomizer {
 let settings = JSON.parse(jsonFoo);
 
 
+
 d = new DisplayManager();
 
 // Get latest data on page load using JSON asyncronous request
 // https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
-fetch('settings.json')
-  .then(response => response.json())
-  .then((response) => {
-    console.log(response);
-    console.log(response['crc']);
-    settings = response;
-    console.log(settings['crc']);
-    d.setGeneralSettings();
-    d.setPin(0);
-  });
+fetch('settings.json').then((response) => {
+  if (response.ok) {
+    // Override test settings
+    settings = response.json;
+  }
+  // In success or failure, continue to set up the UI
+  d.setGeneralSettings();
+}).catch(function(error) {
+  console.log(error);
+  // In success or failure, continue to set up the UI
+  d.setGeneralSettings();
+});
 
 
 function onPinSelection(e) {
