@@ -22,8 +22,7 @@ FASTLED_USING_NAMESPACE
 
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-#define INITIAL_NUM_LEDS 25
-#define TOTAL_NUM_LEDS    300 // just picking a number for now. Ram-limited
+#define TOTAL_NUM_LEDS    1440 // just picking a number for now. 10 meters of 144 leds/m, should be plenty
 static uint16 offsets[MAX_PINS]; // initialized to 0s at compile time
 static uint16 lengths[MAX_PINS]; // initialized to 0s at compile time
 static CRGB leds[TOTAL_NUM_LEDS];
@@ -187,18 +186,24 @@ void AddNewLedStrip(int pin, int offset, int length) {
       FastLED.addLeds<LED_TYPE,D1,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 1:
       FastLED.addLeds<LED_TYPE,D2,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
-    case 2:
-      FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
-    case 3:
-      FastLED.addLeds<LED_TYPE,D4,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 4:
       FastLED.addLeds<LED_TYPE,D5,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 5:
       FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+
+      // Only support 4-pin setup for right now until I can adjust iram/icache ratio and increase iram slightly
+      // Gotta get that on-board led fading :)
+      // https://www.reddit.com/r/FastLED/comments/kl13bn/text_will_not_fit_in_region_iram1_0_seg/
+/*
+    case 2:
+      FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+    case 3:
+      FastLED.addLeds<LED_TYPE,D4,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 6:
       FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 7:
       FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+      */
   }
 }
 

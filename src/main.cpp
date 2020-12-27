@@ -60,6 +60,7 @@
 #define SSID "EasyLED"
 #define DNS_NAME "easyled.local"
 #define WIFI_STARTUP_TIMEOUT_SECS 120
+#define LED_BUILTIN_BREATHE_PERIOD_SECS 6
 
 
 // No password for now
@@ -67,7 +68,7 @@
 
 struct Settings settings;
 // Used to determine if we should shut off the wifi
-boolean wifiAccessed = false;
+boolean wifiMainPageAccessed = false;
 boolean wifiTimeoutElapsed = false;
 
 DNSServer dnsServer;
@@ -191,6 +192,7 @@ void setup() {
     // Send the static webpage generated from index.html
     // and stored in flash
     server.send_P(200, "text/html", INDEX_HTML);
+    wifiMainPageAccessed = true;
   });
 
   server.on("/settings.json", []() {
@@ -237,14 +239,17 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-  setup_FastLED(&settings);
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
+
+  setup_FastLED(&settings);
+
 }
 
 uint16 b = 0;
 int8 inc = 1;
+unsigned long prevMicros = 0;
 void loop() {
 
   server.handleClient();
@@ -255,13 +260,9 @@ void loop() {
   EVERY_N_SECONDS(1) {
     // Only want to run the below code if the timeout is not elapsed
     if (wifiTimeoutElapsed == false) {
-      if (WiFi.softAPgetStationNum() > 0) {
-        wifiAccessed = true;
-      }
-
       if (millis() > (WIFI_STARTUP_TIMEOUT_SECS * 1000)) {
         wifiTimeoutElapsed = true;
-        if (wifiAccessed == false) {
+        if (wifiMainPageAccessed == false) {
           // Turn off wifi
           Serial.println("Disabling wifi after 120 seconds of unuse at startup");
           WiFi.mode( WIFI_OFF );
@@ -272,21 +273,17 @@ void loop() {
     }
   }
 
-/*
-  // Simple pulse for main blue LED
+  // Set the on-board blue LED a-breathin
   // Requires pin 4 to not be used by FastLED
-  if (b == PWMRANGE) {
-    inc = -1;
-  } else if (b == 0) {
-    inc = 1;
+  if (settings.pins[3].num_leds == 0 &&
+      micros() - prevMicros > LED_BUILTIN_BREATHE_PERIOD_SECS*1000*1000/(PWMRANGE*2)) {
+    if (b == PWMRANGE) {
+      inc = -1;
+    } else if (b == 0) {
+      inc = 1;
+    }
+    analogWrite(LED_BUILTIN, b += inc);
+    // Also analogWriteFreq(); Default is 1KHz
   }
-  analogWrite(LED_BUILTIN,b += inc);
-  // Also analogWriteFreq(); Default is 1KHz
-  delay(2);
-
-  EVERY_N_MILLISECONDS( 1000 ) {
-    Serial.println("Hello!");
-  }
-  */
 
 }
