@@ -76,19 +76,27 @@ struct Version
   }
 };
 
+enum configuration {
+  CONFIG_EASYLED_4_PIN = 0,
+  CONFIG_EASYLED_8_PIN = 1,
+  CONFIG_MAX = 2
+};
+
 #define SETTINGS_GENERAL_BYTE_COUNT 24
 typedef struct {
   Version version;
   uint16 writeCount;
-  uint8 PADDING_USE_ME_0[2]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
+  uint8 config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
+  uint8 PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
-  uint8 numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
+  uint8 numPinStructsInSettings; // number of pin structs that follow in settings
   uint8 brightness; // 0-255
   uint8 PADDING_USE_ME_1[2];
   uint32 maxPowerMilliwatts;
   // Wifi ID, password, and encryption level?
 
   // When adding fields:
+  //   * Only *append* fields, don't delete or insert
   //   * Try to use padding bytes first. Add padding bytes for unaligned reads/writes
   //   * Increase byte count (SETTINGS_GENERAL_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
@@ -98,6 +106,11 @@ typedef struct {
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
 const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(6);
 
+enum function {
+  FUNCTION_ANIMATION = 0x0,
+  FUNCTION_PIN_NOT_CONNECTED = 0xFF
+};
+
 #define NUM_COLORS 5
 #define EASY_LED_PIN_BYTE_COUNT 23
 struct EasyLEDPin {
@@ -105,10 +118,11 @@ struct EasyLEDPin {
   uint8 function; // >0
   uint16 pattern; // >0
   uint16 num_leds;// >0
-  sint16 offset;  // relative to another pin
+  sint16 offset;  // "pattern" offset relative to the first led of a pattern NOT IMPLEMENTED YET
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
   // When adding fields:
+  //   * Only *append* fields, don't delete or insert
   //   * Try to use padding bytes first. Add padding bytes for unaligned reads/writes
   //   * Increase byte count (EASY_LED_PIN_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
@@ -163,17 +177,17 @@ struct Settings {
       // Reference: https://arduino-esp8266.readthedocs.io/en/latest/libraries.html#eeprom
       bool IO(bool IsWriting);
 
-      
+
 };
 // Make sure size is appropriate
 _Static_assert(sizeof(Settings) == FLASH_PAGE_SIZE, "");
 // Created using https://arduinojson.org/v6/assistant/
-const int SettingsJsonCapacity = SettingsGeneralJsonCapacity + 
+const int SettingsJsonCapacity = SettingsGeneralJsonCapacity +
                                  // pins array
-                                 JSON_OBJECT_SIZE(1) + 
+                                 JSON_OBJECT_SIZE(1) +
                                  // MAX_PINS pins
                                  JSON_ARRAY_SIZE(MAX_PINS) + MAX_PINS*EasyLEDPinJsonCapacity +
-                                 // magical number, not sure where it comes from
+                                 // magic number, not sure where it comes from
                                  JSON_ARRAY_SIZE(2);
 
 

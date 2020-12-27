@@ -97,7 +97,7 @@ footer {
 <body>
 
 <div>
-  Brightness: 
+  Brightness:
   <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness">
   <button type="button" id="save" value="1">Save Changes</button>
 </div>
@@ -114,25 +114,25 @@ Pin
   </div>
   <div class="pair">
     <input type="radio" id="radioFive" name="radioPin" value="4">
-    <label for="radioFive">5</label> 
+    <label for="radioFive">5</label>
     </br>
     <input type="radio" id="radioSix" name="radioPin" value="5">
-    <label for="radioSix">6</label> 
+    <label for="radioSix">6</label>
   </div>
   <div class="pair">
     <input type="radio" id="radioThree" name="radioPin" value="2">
-    <label for="radioThree">3</label> 
+    <label for="radioThree">3</label>
     </br>
     <input type="radio" id="radioFour" name="radioPin" value="3">
-    <label for="radioFour">4</label> 
+    <label for="radioFour">4</label>
   </div>
   <div class="pair">
     <input type="radio" id="radioSeven" name="radioPin" value="6">
-    <label for="radioSeven">7</label> 
+    <label for="radioSeven">7</label>
     </br>
     <input type="radio" id="radioEight" name="radioPin" value="7">
-    <label for="radioEight">8</label> 
-  </div>  
+    <label for="radioEight">8</label>
+  </div>
 </div>
 
 
@@ -180,7 +180,7 @@ Pin
 
 
 <div class="customizer" id="CombineCustomizer">
-	<label>Choose Pin: 
+	<label>Choose Pin:
 	  <select name="combine_pin">
     <!-- D1 on board = D1 on GUI, but arrays start at 0! 0-offset it is... -->
 		<option value="0">1</option>
@@ -195,7 +195,7 @@ Pin
 	</label>
 
 	<!-- Add an pattern offset input text box here? -->
-  
+
 </div>
 
 
@@ -211,7 +211,7 @@ let jsonFoo = `{
   "version": "00.01.00.0000",
   "writeCount": 19,
   "crc": 599903706,
-  "numPins": 8,
+  "numPinStructsInSettings": 8,
   "brightness": 35,
   "maxPowerMilliwatts": 4000,
   "pins": [
@@ -378,7 +378,7 @@ class DisplayManager {
     combineCustomizer.setup();
     this.customizers.push(combineCustomizer);
   */
-    
+
     // Hide all customizers to start
     this.customizers.forEach(c => c.hide());
   }
@@ -399,7 +399,7 @@ class DisplayManager {
     updatePinVariable(this.currentPinIndex, "function", f);
     this.showCurrentCustomizer();
   }
-  
+
   // Knowing the current settings and pin, show the proper
   // customizer with the proper settings
   showCurrentCustomizer() {
@@ -425,7 +425,7 @@ class DisplayManager {
     }
     this.customizers[this.activeCustomizerIndex].show();
   }
-  
+
   onCustomizerInput(name, value) {
     // Update our internal copy of settings
     let pin = settings["pins"][this.currentPinIndex];
@@ -443,7 +443,7 @@ class DisplayManager {
     // I like it for it's simplicity and efficiency. Keeping it for now
     fetch(`/set?pin=${this.currentPinIndex};${name}=${value}`);
     //console.log(`/set?pin=${this.currentPinIndex};${name}=${value}`);
-    
+
     // Alternatively one could also publish all details of the
     // currently active customizer
     //activeCustomizer.publish();
@@ -462,7 +462,7 @@ function onCustomizerInput(e) {
   d.onCustomizerInput(e.target.name, e.target.value);
 }
 
-// TODO is the constructor occurring correctly?? Seems to only be 
+// TODO is the constructor occurring correctly?? Seems to only be
 // happening for one customizer and not iterating over all of them?
 // Should probably be using class too
 
@@ -471,7 +471,7 @@ class AnimationCustomizer {
     this.div = document.getElementById("AnimationCustomizer");
     this.d = displayManager;
   }
-  
+
   setup() {
     this.inputs = this.div.querySelectorAll('input, textarea, select');
     // Set up onChanged callback for each input element
@@ -480,20 +480,20 @@ class AnimationCustomizer {
       // We want to use oninput() as it's live, whereas onchanged()
       // is only after the object loses focus.
       input.oninput = onCustomizerInput;
-    }	
+    }
   }
-  
+
   hide() {
     this.div.style.display = "none";
   }
-    
+
   show() {
     this.div.style.display = "block";
   }
-  
+
   publish() {
   }
-  
+
 }
 
 class CombineCustomizer extends AnimationCustomizer {

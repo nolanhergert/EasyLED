@@ -28,13 +28,13 @@ void CRGBToHtmlColorCode(CRGB c, String& s) {
 // Very stack inefficient probably? Not sure...
 // Probably want to do something like this: https://github.com/bblanchon/ArduinoJson/issues/166
 
-// Don't need to be future compatible, since we're also serving 
+// Don't need to be future compatible, since we're also serving
 // that the user is interacting with.... is that logic right?
 // Stack size is 4K, so probably should use heap
 void Settings::serialize(String& s) {
   int i, j = 0;
   DynamicJsonDocument doc(SettingsJsonCapacity);
-  
+
   // General settings
   String version;
 
@@ -42,13 +42,13 @@ void Settings::serialize(String& s) {
   doc["version"] = version;
   doc["writeCount"] = general.writeCount;
   doc["crc"] = general.crc;
-  doc["numPins"] = general.numPins;
+  doc["numPinStructsInSettings"] = general.numPinStructsInSettings;
   doc["brightness"] = general.brightness;
   doc["maxPowerMilliwatts"] = general.maxPowerMilliwatts;
-  
+
   JsonArray pinsJson = doc.createNestedArray("pins");
   // Settings for each pin
-  for (i = 0; i < general.numPins; i++) {
+  for (i = 0; i < general.numPinStructsInSettings; i++) {
     JsonObject pin = pinsJson.createNestedObject();
     pin["index"] = pins[i].index;
     pin["function"] = pins[i].function;
@@ -62,7 +62,7 @@ void Settings::serialize(String& s) {
       colors.add(HTMLColorCode);
     }
   }
-  
+
   serializeJsonPretty(doc, s);
   // doc is freed once it goes out of scope
 }
@@ -73,7 +73,7 @@ void Settings::deserialize(const String &json) {
   deserializeJson(doc, json);
   int i, j = 0;  // Settings for each pin
 
-  
+
   // Save a few clock cycles this way https://arduinojson.org/v6/api/jsonobject/containskey/
   uint8 function; // >0
   uint16 pattern; // >0
@@ -81,14 +81,14 @@ void Settings::deserialize(const String &json) {
 
   // Only deserialize what we know about. Ignore? everything else
   // Should be able to handle partial updates too...
-  
-  
+
+
 
   // Don't need or want to modify these normally
   //doc["version"] = ver;
   //doc["writeCount"] = general.writeCount;
   //doc["crc"] = general.crc;
-  //doc["numPins"] = general.numPins;
+  //doc["numPinStructsInSettings"] = general.numPinStructsInSettings;
 
   // Going a little weird here because 0 is a valid brightness value
   // https://arduinojson.org/v6/api/jsonobject/containskey/
@@ -101,7 +101,7 @@ void Settings::deserialize(const String &json) {
   if (!pinsJson) return;
 
 
-  for (i = 0; i < general.numPins; i++) {
+  for (i = 0; i < general.numPinStructsInSettings; i++) {
     JsonObject pin = pinsJson[i];
     if (!pin) continue; // no pin value provided
 
@@ -131,7 +131,7 @@ void Settings::deserialize(const String &json) {
         colors.add(HTMLColorCode);
       }
     }
-  } 
+  }
 }
 */
 
@@ -143,24 +143,33 @@ void Settings::setDefaults() {
 
   // Just do a full reset for now?
   // Save off a few fields that shouldn't be changed before zeroing
-  //uint16 numPins = general.numPins;
-  //uint16 writeCount = general.writeCount;
+  uint8 config = CONFIG_EASYLED_4_PIN; //general.config;
+  uint16 writeCount = general.writeCount;
 
 
   memset(this, 0, sizeof(*this));
 
   general.version.major = 0;
   general.version.minor = 1;// = {0,1,0,0};
-  general.writeCount = 0;
-  general.numPins = MAX_PINS;
+  general.writeCount = writeCount;
+  general.config = config;
+  general.numPinStructsInSettings = MAX_PINS;
   general.brightness = DEFAULT_BRIGHTNESS;
   general.maxPowerMilliwatts = DEFAULT_MAX_MILLIWATTS;
-  
-  for (int i = 0; i < general.numPins; i++) {
+
+  for (int i = 0; i < general.numPinStructsInSettings; i++) {
+    if (general.config == CONFIG_EASYLED_4_PIN && (i == 2 || i == 3 || i == 6 || i == 7)) {
+      // use this as the indicator as to whether the pin is hooked up or not
+      pins[i].function = FUNCTION_PIN_NOT_CONNECTED;
+      pins[i].num_leds = 0;
+    } else {
+      pins[i].function = FUNCTION_ANIMATION;
+      pins[i].num_leds = 10;
+    }
     pins[i].index = i;
-    pins[i].colors[0] = CRGB::HTMLColorCode::Blue;
     pins[i].pattern = i;
-    pins[i].num_leds = 10;
+    pins[i].offset = 0;
+    pins[i].colors[0] = CRGB::HTMLColorCode::Blue;
   }
 }
 
@@ -192,7 +201,7 @@ bool Settings::IO(bool IsWriting) {
   Serial.println(general.version.minor);
   Serial.print("Write count: ");
   Serial.println(general.writeCount);
-  
+
 
   if (IsWriting) {
     general.writeCount++;
@@ -204,7 +213,7 @@ bool Settings::IO(bool IsWriting) {
   general.crc = 0;
 
   crc = crc32Buffer(this, sizeof(*this));
-  if (!IsWriting && (crc != crcCopy || general.numPins > MAX_PINS)) {
+  if (!IsWriting && (crc != crcCopy || general.numPinStructsInSettings > MAX_PINS)) {
     // Reading from EEPROM and crc or data doesn't check out.
     // Create defaults and write to flash
     Serial.print("CRC didn't align. Creating defaults!\n");
@@ -237,7 +246,7 @@ bool Settings::IO(bool IsWriting) {
     }
     Serial.println("Success in writing to eeprom!");
   }
-  
+
   rc = RC_SUCCESS;
 
 Finish:

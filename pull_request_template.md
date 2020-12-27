@@ -1,8 +1,8 @@
 ## Checklist
 
-- [ ] Flashing and functionality test on 8-pin test board works
+- [ ] Flashing and functionality test on 4-pin board works
 <!--
-- [ ] Functionality on 4-pin board works as expected
+- [ ] Functionality on 8-pin board works as expected
 - [ ] Upgrade tested
 - [ ] Downgrade tested
 -->

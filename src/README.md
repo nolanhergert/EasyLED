@@ -14,6 +14,8 @@ Minimum Viable Product
   * DONE! Wifi turns off after N (60?) seconds if unused for security and power consumption?
   * DONE! Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
     * Make unique wifi name using mac address like wled. Double check wled support of multiple strips?
+  * Instructions for setup and customization
+  * GUI should show 4 pins appropriately
   * Serial number, epoxy type, case design, num pins, in flash eeprom.
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think. User can pick what to do (off/on/fade (pick a time period in seconds?))

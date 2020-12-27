@@ -7,11 +7,11 @@
 
 FASTLED_USING_NAMESPACE
 
-// FastLED "100-lines-of-code" demo reel, showing just a few 
-// of the kinds of animation patterns you can quickly and easily 
-// compose using FastLED.  
+// FastLED "100-lines-of-code" demo reel, showing just a few
+// of the kinds of animation patterns you can quickly and easily
+// compose using FastLED.
 //
-// This example also shows one easy way to define multiple 
+// This example also shows one easy way to define multiple
 // animations patterns and have them automatically rotate.
 //
 // -Mark Kriegsman, December 2014
@@ -23,21 +23,18 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define INITIAL_NUM_LEDS 25
-#define TOTAL_NUM_LEDS    MAX_PINS*INITIAL_NUM_LEDS
-uint32 offsets[MAX_PINS];
-uint32 lengths[MAX_PINS];
-CRGB leds[TOTAL_NUM_LEDS];
+#define TOTAL_NUM_LEDS    300 // just picking a number for now. Ram-limited
+static uint16 offsets[MAX_PINS]; // initialized to 0s at compile time
+static uint16 lengths[MAX_PINS]; // initialized to 0s at compile time
+static CRGB leds[TOTAL_NUM_LEDS];
 
-
-// Actual number of pins from settings
-uint8 numPins;
 
 
 #define FRAMES_PER_SECOND  200
 
 
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-  
+
 void rainbow(const EasyLEDPin *pPin) {
   fill_rainbow( &leds[offsets[pPin->index]], pPin->num_leds, gHue, 7);
 }
@@ -48,7 +45,7 @@ void glitter(const EasyLEDPin *pPin, fract8 chanceOfGlitter) {
   }
 }
 
-void rainbowWithGlitter(const EasyLEDPin *pPin) 
+void rainbowWithGlitter(const EasyLEDPin *pPin)
 {
   // FastLED's built-in rainbow generator
   rainbow(pPin);
@@ -58,7 +55,7 @@ void rainbowWithGlitter(const EasyLEDPin *pPin)
 }
 
 
-void confetti(const EasyLEDPin *pPin) 
+void confetti(const EasyLEDPin *pPin)
 {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy( &leds[offsets[pPin->index]], pPin->num_leds, 10);
@@ -108,17 +105,17 @@ CRGBPalette16 targetPalette(OceanColors_p);
 void fillnoise8(const EasyLEDPin *pPin) {
 
   #define scale 30                                                          // Don't change this programmatically or everything shakes.
-  
+
   for(uint32 i = 0; i < pPin->num_leds; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
     uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
     leds[offsets[pPin->index] + i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
   }
 
-  
+
   EVERY_N_MILLIS(10) {
     nblendPaletteTowardPalette(currentPalette, targetPalette, 48);          // Blend towards the target palette over 48 iterations.
   }
- 
+
   EVERY_N_SECONDS(5) {                                                      // Change the target palette to a random one every 5 seconds.
     uint8_t baseC=random8();
     targetPalette = CRGBPalette16(CHSV(baseC+random8(32), 255, random8(128,255)),   // Create palettes with similar colours.
@@ -145,10 +142,10 @@ void RecomputeOffsets() {
   uint i = 0;
   // Recompute offsets
   offsets[0] = 0;
-  for (i = 1; i < numPins; i++) {
+  for (i = 1; i < MAX_PINS; i++) {
     offsets[i] = offsets[i-1] + lengths[i-1];
   }
-} 
+}
 
 // Assume that we entered the new led strips in increasing
 // pin order and they are in this linked list in the same
@@ -158,7 +155,11 @@ void SetLedStripParameters() {
   uint i = 0;
 	while(pCur) {
     pCur->setLeds(leds + offsets[i], lengths[i]);
+
     i++;
+    // Skip over unused pins
+    while (lengths[i] == 0) i++;
+
 		pCur = pCur->next();
 	}
 }
@@ -168,11 +169,11 @@ void ModifyLedStrip(const EasyLEDPin *pPin) {
   // loop_FastLED(), but here are a few things that need
   // to get re-initialized
   lengths[pPin->index] = pPin->num_leds;
-  
+
   // Set all leds in global array to black
   FastLED.clear();
   FastLED.show();
-  
+
   RecomputeOffsets();
   SetLedStripParameters();
 }
@@ -181,7 +182,6 @@ void AddNewLedStrip(int pin, int offset, int length) {
   // I could have used an array here, but that's kind of complicated with templates, etc
   // A solution would be nice, but this *works* for now and is small.
   // Going with simple for now
-  //Serial.println("Alloc called");
   switch (pin) {
     case 0:
       FastLED.addLeds<LED_TYPE,D1,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
@@ -198,7 +198,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
     case 6:
       FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 7:
-      FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);        
+      FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
   }
 }
 
@@ -206,7 +206,7 @@ uint8 initialStartupBrightness = 0;
 uint8 initialStartupBrightnessMax;
 
 
-//static const 
+//static const
 void setup_FastLED(const Settings *pSettings) {
 
   int i = 0;
@@ -216,18 +216,21 @@ void setup_FastLED(const Settings *pSettings) {
   //FastLED.setMaxPowerInMilliWatts(pSettings->general.maxPowerMilliwatts);
 
   initialStartupBrightnessMax = pSettings->general.brightness;
-  
-  numPins = pSettings->general.numPins;
+
   // And save them when changed without wearing out eeprom during testing.
-  for (i = 0; i < numPins; i++) {
+  for (i = 0; i < MAX_PINS; i++) {
     lengths[i] = pSettings->pins[i].num_leds;
     offsets[i] = pSettings->pins[i].offset;
   }
 
   RecomputeOffsets();
-  for (i = 0; i < numPins; i++) {
+  for (i = 0; i < MAX_PINS; i++) {
+    // Skip unused pins
+    if (lengths[i] == 0) {
+      continue;
+    }
     AddNewLedStrip(i, offsets[i], lengths[i]);
-  }  
+  }
 }
 
 
@@ -243,16 +246,16 @@ void loop_FastLED(const Settings *pSettings)
       FastLED.setBrightness(initialStartupBrightness++);
     }
   }
-  for (i = 0; i < numPins; i++) {
+  for (i = 0; i < MAX_PINS; i++) {
     // Call the current pattern function once, updating the 'leds' array
     gPatterns[pSettings->pins[i].pattern](&(pSettings->pins[i]));
   }
 
   // send the 'leds' array out to the actual LED strip
-  FastLED.show();  
+  FastLED.show();
   // insert a delay (if needed) to keep the framerate modest
-  FastLED.delay(1000/FRAMES_PER_SECOND); 
+  FastLED.delay(1000/FRAMES_PER_SECOND);
   gHue++;
-  
+
 }
 
