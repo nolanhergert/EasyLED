@@ -3,9 +3,6 @@ What features do people care about! Maybe just get a minimum viable product out 
 Minimum Viable Product
   * DONE! Select from available patterns
   * DONE! Save preferences across power cycle and firmware update
-     * Setting one value (say pattern) doesn't change other values in pin struct. The whole pin struct is sent in to FastLED updater. Need to remove comment in that updater
-     that prevents length from getting updated
-     * Maybe can just use eeprom rotate, don't need the full flashee script.
   * DONE-ish! Select preferred colors and have them expressed in patterns?
   * Show estimated power usage, ideally "how long battery will last". Need to input battery size.
   * DONE! Optionally encase in resin for weatherproofing. Maybe have longer usb cable?
@@ -15,8 +12,8 @@ Minimum Viable Product
   * DONE! Copy DNS naming algorithm from WLED, since it works on android. Test on iPhone and computer too.
     * DONE! Make unique wifi name using mac address like wled.
     * DONE! Double check wled support of multiple strips? Added to 1.0, as it's not done yet on WLED side.
-  * Instructions for setup and customization
-  * GUI should show 4 pins appropriately
+  * DONE-ish! Instructions for setup and customization
+  * DONE! GUI should show 4 pins appropriately
   * Serial number, epoxy type, case design, num pins, in flash eeprom.
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
     * Fade LED during operation? Now it's a free pin...D4 I think. User can pick what to do (off/on/fade (pick a time period in seconds?))

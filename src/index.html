@@ -8,13 +8,50 @@
 
 body {
   width: 400px;
-  height: 600px;
+  font-size: 12px;
+
+
 }
 
+/*
+#wrapper {
+    width: 1000px;
+}
+*/
+#header {
+    float: left;
+    height: auto;
+    padding: 10px;
+    margin-bottom: 5px;
+    width: 100%;
+    background: #F4F4F4;
+}
+
+#leftcolumn {
+/* ///////////////////////////////// */
+    /* When updating the width, also update #content margin-left below */
+    width: 90px;
+/* ///////////////////////////////// */
+    float: left;
+    background: #F4F4F4;
+    margin-right: 5px;
+    padding: 10px;
+}
+
+#content {
+    background: #FFFFFF;
+    margin-left: 90px;
+}
+
+#footer {
+  clear: both;
+  padding-top: 100px;
+}
+
+
 .radio-toolbar {
-  margin: 10px;
   /* Only have room for two columns */
-  width: 160px;
+  width: 120px;
 }
 
 .radio-toolbar input[type="radio"] {
@@ -30,8 +67,8 @@ body {
   font-size: 16px;
   border: 2px solid #444;
   border-radius: 4px;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   text-align: center;
 }
 
@@ -49,7 +86,7 @@ body {
 }
 
 .pair {
-  margin: 10px;
+  margin: 5px;
   float: left;
 }
 
@@ -77,18 +114,23 @@ body {
   -moz-appearance: textfield;
 }
 
-#save {
-  float: right;
-  font-size: large;
-}
-footer {
-  position: absolute;
-  top: 350px;
+input[type=range] {
+  background: transparent;
 }
 
-#reset {
-  font-size: large;
+input[type=range]::-moz-range-track {
+  background: #ddd;
 }
+
+input[type=number]{
+    width: 30px;
+}
+
+#save {
+  float: right;
+}
+
+
 /*****************************************/
 
 </style>
@@ -96,47 +138,49 @@ footer {
 </head>
 <body>
 
-<div>
+<div id="header">
   Brightness:
   <input type="range" min="0" max="255" value="65" step="5" class="slider" id="brightness">
   <button type="button" id="save" value="1">Save Changes</button>
 </div>
 
 
-Pin
-<div class="radio-toolbar">
+
+<div id="leftcolumn" class="radio-toolbar">
+  Pin: </br>
   <div class="pair">
-    <input type="radio" id="radioOne" name="radioPin" value="0" checked>
-    <label for="radioOne">1</label>
+    <input type="radio" id="radio1" name="radioPin" value="0" checked>
+    <label for="radio1" id="radio1label">1</label>
     </br>
-    <input type="radio" id="radioTwo" name="radioPin" value="1">
-    <label for="radioTwo">2</label>
+    <input type="radio" id="radio2" name="radioPin" value="1">
+    <label for="radio2" id="radio2label">2</label>
   </div>
   <div class="pair">
-    <input type="radio" id="radioFive" name="radioPin" value="4">
-    <label for="radioFive">5</label>
+    <input type="radio" id="radio5" name="radioPin" value="4">
+    <label for="radio5" id="radio5label">5</label>
     </br>
-    <input type="radio" id="radioSix" name="radioPin" value="5">
-    <label for="radioSix">6</label>
+    <input type="radio" id="radio6" name="radioPin" value="5">
+    <label for="radio6" id="radio6label">6</label>
   </div>
   <div class="pair">
-    <input type="radio" id="radioThree" name="radioPin" value="2">
-    <label for="radioThree">3</label>
+    <input type="radio" id="radio3" name="radioPin" value="2">
+    <label for="radio3" id="radio3label">3</label>
     </br>
-    <input type="radio" id="radioFour" name="radioPin" value="3">
-    <label for="radioFour">4</label>
+    <input type="radio" id="radio4" name="radioPin" value="3">
+    <label for="radio4" id="radio4label">4</label>
   </div>
   <div class="pair">
-    <input type="radio" id="radioSeven" name="radioPin" value="6">
-    <label for="radioSeven">7</label>
+    <input type="radio" id="radio7" name="radioPin" value="6">
+    <label for="radio7" id="radio7label">7</label>
     </br>
-    <input type="radio" id="radioEight" name="radioPin" value="7">
-    <label for="radioEight">8</label>
+    <input type="radio" id="radio8" name="radioPin" value="7">
+    <label for="radio8" id="radio8label">8</label>
   </div>
 </div>
+</div>
 
-
-<label>Choose a function:
+<div id="content">
+<label>Function:
   <select name="function">
     <option value="0">Animation</option>
     <!--<option value="1">Combine With</option>-->
@@ -161,7 +205,7 @@ Pin
     <button class="decrement">-</button>
     <select class="value" name="pattern">
       <option value="0">Rainbow</option>
-      <option value="1">Rainbow w/ Glitter</option>
+      <option value="1">Rainbow Glitter</option>
       <option value="2">Color</option>
       <option value="3">Fill Noise</option>
       <option value="4">Juggle</option>
@@ -197,32 +241,33 @@ Pin
 	<!-- Add an pattern offset input text box here? -->
 
 </div>
+</div>
 
 
 
-<footer>
+<div id="footer">
 <button type="button" id="reset" value="1">Reset To Defaults</button>
-</footer>
+</div>
 <!------------------------------------------------->
 
 
 <script>
 let jsonFoo = `{
   "version": "00.01.00.0000",
-  "writeCount": 19,
-  "crc": 599903706,
+  "writeCount": 9,
+  "crc": 2854083994,
   "numPinStructsInSettings": 8,
-  "brightness": 35,
+  "brightness": 255,
   "maxPowerMilliwatts": 4000,
   "pins": [
     {
       "index": 0,
       "function": 0,
-      "pattern": 7,
-      "num_leds": 16,
+      "pattern": 0,
+      "num_leds": 10,
       "offset": 0,
       "colors": [
-        "ff00ff",
+        "0000ff",
         "000000",
         "000000",
         "000000",
@@ -247,7 +292,7 @@ let jsonFoo = `{
       "index": 2,
       "function": 255,
       "pattern": 2,
-      "num_leds": 10,
+      "num_leds": 0,
       "offset": 0,
       "colors": [
         "0000ff",
@@ -259,9 +304,9 @@ let jsonFoo = `{
     },
     {
       "index": 3,
-      "function": 0,
+      "function": 255,
       "pattern": 3,
-      "num_leds": 10,
+      "num_leds": 0,
       "offset": 0,
       "colors": [
         "0000ff",
@@ -301,9 +346,9 @@ let jsonFoo = `{
     },
     {
       "index": 6,
-      "function": 0,
+      "function": 255,
       "pattern": 6,
-      "num_leds": 10,
+      "num_leds": 0,
       "offset": 0,
       "colors": [
         "0000ff",
@@ -315,12 +360,13 @@ let jsonFoo = `{
     },
     {
       "index": 7,
-      "function": 0,
+      "function": 255,
       "pattern": 7,
-      "num_leds": 10,
+      "num_leds": 0,
       "offset": 0,
       "colors": [
         "0000ff",
+        "000000",
         "000000",
         "000000",
         "000000"
@@ -387,7 +433,9 @@ class DisplayManager {
     document.getElementById("brightness").value = settings["brightness"];
     for (let i = 0; i < settings["numPinStructsInSettings"]; i++) {
       if (settings["pins"][i]["function"] == 0xFF) {
-        console.log("Pin " + (settings["pins"][i]["index"]+1) + " disabled");
+        // Hide disabled pins
+        document.getElementById("radio" + (settings["pins"][i]["index"]+1) + "label").style.display = "none";
+        console.log("Pin " + "radio" + (settings["pins"][i]["index"]+1) + " disabled");
       }
     }
     this.setPin(0);
@@ -511,22 +559,21 @@ class CombineCustomizer extends AnimationCustomizer {
 
 
 
+// Some default settings for  allowing debugging without rebuilding
 let settings = JSON.parse(jsonFoo);
-
-
 
 d = new DisplayManager();
 
 // Get latest data on page load using JSON asyncronous request
 // https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Introducing
-fetch('settings.json').then((response) => {
-  if (response.ok) {
-    // Override test settings
-    settings = response.json;
+fetch('settings.json')
+  .then(response => response.json())
+  .then((response) => {
+    settings = response;
+    // In success or failure, continue to set up the UI
+    d.setGeneralSettings();
   }
-  // In success or failure, continue to set up the UI
-  d.setGeneralSettings();
-}).catch(function(error) {
+).catch(function(error) {
   console.log(error);
   // In success or failure, continue to set up the UI
   d.setGeneralSettings();
@@ -544,8 +591,15 @@ document.getElementsByName("radioPin").forEach(p => p.onclick = onPinSelection);
 
 // Probably want to refactor this and the above to be together
 function onGeneralInput(e) {
-  fetch(`/set?${e.target.id}=${e.target.value}`);
+  /*
+  if (${e.target.id} == "reset") {
+    if (!confirm("Are you sure you want to reset?")) {
+      return;
+    }
+  }
+  */
   console.log(`/set?${e.target.id}=${e.target.value}`);
+  fetch(`/set?${e.target.id}=${e.target.value}`);
 }
 
 // Selector on change

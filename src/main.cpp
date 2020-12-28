@@ -60,7 +60,9 @@
 #define SSID_PREFIX "EasyLED"
 #define DNS_NAME "easyled.local"
 #define WIFI_STARTUP_TIMEOUT_SECS 120
-#define LED_BUILTIN_BREATHE_PERIOD_SECS 6
+#define LED_BUILTIN_BREATHE_PERIOD_MILLISECS 6123
+#define LED_BUILTIN_PULSE_PERIOD_MILLISECS 1000
+#define LED_BUILTIN_PULSE_WIDTH_MILLISECS 50
 
 
 // No password for now
@@ -243,21 +245,22 @@ void setup() {
   server.onNotFound(handleNotFound);
 
   server.begin();
-  delay(1000);
   Serial.println("HTTP server started");
-
-
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
 
   setup_FastLED(&settings);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  // Keep on-board led switched on
+  digitalWrite(LED_BUILTIN, LOW);
+
 }
 
-uint16 b = 0;
-int8 inc = 1;
-unsigned long prevMicros = 0;
+short int led_builtin_val = 0;
+short int led_builtin_breathe_val = 0;
+uint16 ms_after_heartbeat = 0;
+int8 sign = 1;
+short int change = 0;
+unsigned long prevMillis = 0;
 void loop() {
 
   server.handleClient();
@@ -280,18 +283,37 @@ void loop() {
       }
     }
   }
-
+/*
   // Set the on-board blue LED a-breathin
   // Requires pin 4 to not be used by FastLED
-  if (settings.pins[3].num_leds == 0 &&
-      micros() - prevMicros > LED_BUILTIN_BREATHE_PERIOD_SECS*1000*1000/(PWMRANGE*2)) {
-    if (b == PWMRANGE) {
-      inc = -1;
-    } else if (b == 0) {
-      inc = 1;
+  if (settings.pins[3].num_leds == 0) {
+       // Not sure why the extra divide by 2 is required at the end
+    change = sign * (millis() - prevMillis) * (PWMRANGE*2) / (LED_BUILTIN_BREATHE_PERIOD_MILLISECS);
+    // Handle wraparound in an absolute value sense (bounce off the edge with same velocity)
+    led_builtin_breathe_val -= change;
+    if (led_builtin_breathe_val < 0) {
+      sign = 1;
+      led_builtin_breathe_val = abs(led_builtin_breathe_val);
+    } else if (led_builtin_breathe_val >= PWMRANGE) {
+      sign = -1;
+      led_builtin_breathe_val = PWMRANGE - (led_builtin_breathe_val - PWMRANGE);
     }
-    analogWrite(LED_BUILTIN, b += inc);
+
+    // Write out final value
+    ms_after_heartbeat = millis() % LED_BUILTIN_PULSE_PERIOD_MILLISECS;
+    if (ms_after_heartbeat > 0 && ms_after_heartbeat < LED_BUILTIN_PULSE_WIDTH_MILLISECS) {
+      // Heartbeat
+      //led_builtin_val = 0; // Max brightness is 0
+    } else {
+      // Breathe val
+      led_builtin_val = led_builtin_breathe_val;
+    }
+
+    analogWrite(LED_BUILTIN, led_builtin_val);
+    prevMillis = millis();
     // Also analogWriteFreq(); Default is 1KHz
   }
+  */
+
 
 }

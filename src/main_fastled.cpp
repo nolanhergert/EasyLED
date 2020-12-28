@@ -252,6 +252,9 @@ void loop_FastLED(const Settings *pSettings)
     }
   }
   for (i = 0; i < MAX_PINS; i++) {
+    if (pSettings->pins[i].num_leds == 0) {
+      continue;
+    }
     // Call the current pattern function once, updating the 'leds' array
     gPatterns[pSettings->pins[i].pattern](&(pSettings->pins[i]));
   }

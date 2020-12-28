@@ -143,7 +143,7 @@ void Settings::setDefaults() {
 
   // Just do a full reset for now?
   // Save off a few fields that shouldn't be changed before zeroing
-  uint8 config = CONFIG_EASYLED_4_PIN; //general.config;
+  uint8 config = general.config;
   uint16 writeCount = general.writeCount;
 
 
