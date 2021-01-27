@@ -23,6 +23,11 @@ Minimum Viable Product
 v1.0
   * Double check on older Android, iPhone and a Windows device emulator? Maybe old IE and safari as well. I think it *should* work, but maybe iterators won't work.
   * Talk with various advisors as whether it's wise to work on it to full product or not.
+  * Incorporate more patterns from WLED (some are below). Be able to adjust:
+    * Speed (but in a smooth way, not decreasing update rate)
+    * Colormap / colors
+    * Density of colormap/pattern (zoom in / out)
+    * Super awesome would be picking multiple patterns in sequence and then pick a transition between them. But that's when it's a full time job.
 
 Somehow wled.me works on android?
 
