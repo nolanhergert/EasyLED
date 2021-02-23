@@ -191,10 +191,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
     case 5:
       FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
 
-      // Only support 4-pin setup for right now until I can adjust iram/icache ratio and increase iram slightly
-      // Gotta get that on-board led fading :)
-      // https://www.reddit.com/r/FastLED/comments/kl13bn/text_will_not_fit_in_region_iram1_0_seg/
-/*
+    // Rest of pins for 8-pin setup
     case 2:
       FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 3:
@@ -203,7 +200,6 @@ void AddNewLedStrip(int pin, int offset, int length) {
       FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 7:
       FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
-      */
   }
 }
 
@@ -225,6 +221,10 @@ void setup_FastLED(const Settings *pSettings) {
   // And save them when changed without wearing out eeprom during testing.
   for (i = 0; i < MAX_PINS; i++) {
     lengths[i] = pSettings->pins[i].num_leds;
+    Serial.print("Lengths:");
+    Serial.print(i);
+    Serial.print(", ");
+    Serial.println(lengths[i]);
     offsets[i] = pSettings->pins[i].offset;
   }
 
@@ -234,6 +234,8 @@ void setup_FastLED(const Settings *pSettings) {
     if (lengths[i] == 0) {
       continue;
     }
+    Serial.print("Add led strip at pin: ");
+    Serial.println(i);
     AddNewLedStrip(i, offsets[i], lengths[i]);
   }
 }

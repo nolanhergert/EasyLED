@@ -283,9 +283,15 @@ void loop() {
       }
     }
   }
+
+
+
 /*
   // Set the on-board blue LED a-breathin
   // Requires pin 4 to not be used by FastLED
+  // Also can't support AnalogWrite and 8 pins of FastLED at the same time for right now
+  // https://www.reddit.com/r/FastLED/comments/kl13bn/text_will_not_fit_in_region_iram1_0_seg/
+  // So not doing fading for now;
   if (settings.pins[3].num_leds == 0) {
        // Not sure why the extra divide by 2 is required at the end
     change = sign * (millis() - prevMillis) * (PWMRANGE*2) / (LED_BUILTIN_BREATHE_PERIOD_MILLISECS);

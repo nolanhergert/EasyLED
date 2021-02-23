@@ -76,17 +76,17 @@ struct Version
   }
 };
 
-enum configuration {
-  CONFIG_EASYLED_4_PIN = 0,
-  CONFIG_EASYLED_8_PIN = 1,
-  CONFIG_MAX = 2
-};
+
+typedef uint8 Configuration;
+#define CONFIG_EASYLED_4_PIN  0
+#define CONFIG_EASYLED_8_PIN  1
+  // Max size of uint8
 
 #define SETTINGS_GENERAL_BYTE_COUNT 24
 typedef struct {
   Version version;
   uint16 writeCount;
-  uint8 config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
+  Configuration config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
   uint8 PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
   uint8 numPinStructsInSettings; // number of pin structs that follow in settings

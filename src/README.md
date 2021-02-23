@@ -21,6 +21,7 @@ Minimum Viable Product
     * Have a setting for it, but need to have a good default strip length. Since fastled can't tell whether display is actually driving or not
 
 v1.0
+  * Not sure why I'm still getting output on the 2nd 4/8 pins.
   * Double check on older Android, iPhone and a Windows device emulator? Maybe old IE and safari as well. I think it *should* work, but maybe iterators won't work.
   * Talk with various advisors as whether it's wise to bring it to a full product or just leave as a "kit".
   * WLED multi led strip support? https://github.com/Aircoookie/WLED/issues/104

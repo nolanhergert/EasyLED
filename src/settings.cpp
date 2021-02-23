@@ -143,7 +143,7 @@ void Settings::setDefaults() {
 
   // Just do a full reset for now?
   // Save off a few fields that shouldn't be changed before zeroing
-  uint8 config = general.config;
+  Configuration config = general.config;
   uint16 writeCount = general.writeCount;
 
 
@@ -167,7 +167,7 @@ void Settings::setDefaults() {
       pins[i].num_leds = 10;
     }
     pins[i].index = i;
-    pins[i].pattern = i;
+    pins[i].pattern = 0; // rainbow
     pins[i].offset = 0;
     pins[i].colors[0] = CRGB::HTMLColorCode::Blue;
   }
