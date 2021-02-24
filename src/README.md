@@ -16,7 +16,8 @@ Minimum Viable Product
   * DONE! GUI should show 4 pins appropriately
   * Serial number, epoxy type, case design, num pins, in flash eeprom.
   * DONE! 4-strip version can have half the resin / board size? Should be much smaller...nice!
-    * Fade LED during operation? Now it's a free pin...D4 I think. User can pick what to do (off/on/fade (pick a time period in seconds?))
+    * WON'T FIX Fade LED during operation? Now it's a free pin...D4 I think. User can pick what to do (off/on/fade (pick a time period in seconds?))
+  * Changing number of LEDs should only set the changed number of LEDs to black, not the whole strip
   * Limit current
     * Have a setting for it, but need to have a good default strip length. Since fastled can't tell whether display is actually driving or not
 
