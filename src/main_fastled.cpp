@@ -126,9 +126,6 @@ void fillnoise8(const EasyLEDPin *pPin) {
 }
 
 
-
-
-
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])(const EasyLEDPin *pPin);
 //SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, fillnoise8 };
@@ -190,7 +187,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
       FastLED.addLeds<LED_TYPE,D5,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 5:
       FastLED.addLeds<LED_TYPE,D6,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
-
+/*
     // Rest of pins for 8-pin setup
     case 2:
       FastLED.addLeds<LED_TYPE,D3,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
@@ -200,6 +197,7 @@ void AddNewLedStrip(int pin, int offset, int length) {
       FastLED.addLeds<LED_TYPE,D7,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
     case 7:
       FastLED.addLeds<LED_TYPE,D8,COLOR_ORDER>(leds, offset, length).setCorrection(TypicalLEDStrip);
+      */
   }
 }
 
