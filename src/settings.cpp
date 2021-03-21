@@ -158,7 +158,7 @@ void Settings::setDefaults() {
   general.maxPowerMilliwatts = DEFAULT_MAX_MILLIWATTS;
 
   for (int i = 0; i < general.numPinStructsInSettings; i++) {
-    if (general.config == CONFIG_EASYLED_4_PIN && (i == 2 || i == 3 || i == 6 || i == 7)) {
+    if (general.config == Configuration::CONFIG_EASYLED_4_PIN && (i == 2 || i == 3 || i == 6 || i == 7)) {
       // use this as the indicator as to whether the pin is hooked up or not
       pins[i].function = FUNCTION_PIN_NOT_CONNECTED;
       pins[i].num_leds = 0;

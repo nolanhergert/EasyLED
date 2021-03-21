@@ -77,10 +77,17 @@ struct Version
 };
 
 
-typedef uint8 Configuration;
-#define CONFIG_EASYLED_4_PIN  0
-#define CONFIG_EASYLED_8_PIN  1
+//typedef uint8 Configuration;
+//#define CONFIG_EASYLED_4_PIN  0
+//#define CONFIG_EASYLED_8_PIN  1
+// Can only use values from this enum
+// And it enforces the max size too!
+// https://stackoverflow.com/a/1122109/931280
+enum class Configuration : uint8 {
+  CONFIG_EASYLED_4_PIN = 0,
+  CONFIG_EASYLED_8_PIN = 1,
   // Max size of uint8
+};
 
 #define SETTINGS_GENERAL_BYTE_COUNT 24
 typedef struct {
