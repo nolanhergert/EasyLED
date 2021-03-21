@@ -20,7 +20,8 @@ Just let esptool.py run continually
 
 ## Upload firmware
 Current command: (just run Platform.io verbose upload)
-"c:\users\nolan-thinkpad\.platformio\penv\scripts\python.exe" "C:\Users\Nolan-Thinkpad\.platformio\packages\tool-esptoolpy\esptool.py" --before no_reset --after soft_reset --chip esp8266 --port "COM8" --baud 1500000 write_flash 0x0 .pio\build\d1_mini\firmware.bin
+Note! Be sure to remove the "--before no_reset " from the platform.io output, since we don't need it
+"c:\users\nolan-thinkpad\.platformio\penv\scripts\python.exe" "C:\Users\Nolan-Thinkpad\.platformio\packages\tool-esptoolpy\esptool.py" --after soft_reset --chip esp8266 --port "COM8" --baud 1500000 write_flash 0x0 .pio\build\d1_mini\firmware.bin
 
 ## Read serial port
 Doesn't really work for some reason? More details on the hardware requirements
