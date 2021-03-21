@@ -9,6 +9,12 @@ Detect *in parallel* when:
 Only need a cheap UART to USB adapter plus some cheap components:
 https://www.instructables.com/FTDI-ESP8266-Definitive-Wiring/
 
+Better yet, just use a NodeMCU or Wemos D1 mini with the enable pin grounded. Awesome!
+https://www.instructables.com/3-Simple-Ways-of-Programming-an-ESP8266-12X-Module/
+  * Nice thing about this is I have a bunch of Wemos D1 minis already that I can use,
+    and it seems to not suffer from the potential of non-unique COM ports that a UART
+    USB knockoff would. 
+
 ## Detect power on of new unflashed ESP8266
 Just let esptool.py run continually
 
