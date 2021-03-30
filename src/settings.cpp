@@ -1,11 +1,10 @@
-#include <c_types.h>
 #include <ErriezCRC32.h>
 #include "settings.h"
 #include <EEPROM.h>
 #include "common.h"
 
 
-#define DEFAULT_BRIGHTNESS (uint8)255 // can be dynamically changed though
+#define DEFAULT_BRIGHTNESS (uint8_t)255 // can be dynamically changed though
 #define DEFAULT_MAX_MILLIWATTS 4 * 1000 // 4V * 1000mA, need to play with this some more
 
 // "RRGGBB" -> 0xRRGGBB
@@ -75,9 +74,9 @@ void Settings::deserialize(const String &json) {
 
 
   // Save a few clock cycles this way https://arduinojson.org/v6/api/jsonobject/containskey/
-  uint8 function; // >0
-  uint16 pattern; // >0
-  uint16 num_leds;// >0
+  uint8_t function; // >0
+  uint16_t pattern; // >0
+  uint16_t num_leds;// >0
 
   // Only deserialize what we know about. Ignore? everything else
   // Should be able to handle partial updates too...
@@ -180,8 +179,8 @@ void Settings::setDefaults() {
 // Also restore defaults if reading and crc doesn't match
 bool Settings::IO(bool IsWriting) {
   bool rc = RC_FAILURE;
-  uint16 i = 0;
-  uint32 crc, crcCopy = 0;
+  uint16_t i = 0;
+  uint32_t crc, crcCopy = 0;
 
   Serial.print("Settings::IO called with ");
   Serial.println(IsWriting);
@@ -191,7 +190,7 @@ bool Settings::IO(bool IsWriting) {
   // Read in initial copy if needed
   if (!IsWriting) {
     for (i = 0; i < sizeof(*this); i++) {
-      ((uint8 *)this)[i] = EEPROM.read(i);
+      ((uint8_t *)this)[i] = EEPROM.read(i);
     }
   }
 
@@ -228,7 +227,7 @@ bool Settings::IO(bool IsWriting) {
   if (IsWriting) {
     for (i = 0; i < sizeof(*this); i++) {
       // Write to internal copy of eeprom
-      EEPROM.write(i, ((uint8 *)this)[i]);
+      EEPROM.write(i, ((uint8_t *)this)[i]);
     }
 
     // Commit to flash
@@ -239,7 +238,7 @@ bool Settings::IO(bool IsWriting) {
 
     // Read data back from flash to ensure integrity
     for (i = 0; i < sizeof(*this); i++) {
-      if (EEPROM.read(i) != ((uint8 *)this)[i]) {
+      if (EEPROM.read(i) != ((uint8_t *)this)[i]) {
         Serial.println("ERROR! EEPROM failed verification");
         goto Finish;
       }

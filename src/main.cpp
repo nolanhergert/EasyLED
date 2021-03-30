@@ -38,9 +38,8 @@
 
 
 
-#include <FastLED.h>
-
 #include <Arduino.h>
+#include <FastLED.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -115,7 +114,7 @@ void ParseURLArgs(ESP8266WebServer& server) {
   // And everything needs to get updated *live*, so having trouble
   // deciding where to put everything so that it's flexible long-
   // term.
-  uint8 pin = 0;
+  uint8_t pin = 0;
   Serial.println(server.argName(0));
 
   if (server.argName(0) == "brightness") {
@@ -164,7 +163,7 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
-uint8 pin = 0;
+uint8_t pin = 0;
 void setup() {
 
   Serial.begin(115200);

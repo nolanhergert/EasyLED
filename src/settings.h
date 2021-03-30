@@ -1,10 +1,8 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
-
-#include <c_types.h>
+#include <Arduino.h>
 #include <FastLED.h>
-#include <inttypes.h>
 #include <ArduinoJson.h>
 
 ////////////////////////////////////////////////////////////////
@@ -31,7 +29,6 @@
 _Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * MAX_PINS <= FLASH_PAGE_SIZE, "");
 
 #include <inttypes.h>
-
 #include <cstdio>
 #include <string>
 #include <ESP8266WebServer.h>
@@ -43,7 +40,7 @@ _Static_assert(SETTINGS_GENERAL_SIZE + EASY_LED_PIN_SIZE * MAX_PINS <= FLASH_PAG
 // https://sourcey.com/articles/comparing-version-strings-in-cpp
 struct Version
 {
-  uint16 major = 0, minor = 0, revision = 0, build = 0;
+  uint16_t major = 0, minor = 0, revision = 0, build = 0;
 
 	bool operator < (const Version& other)
 	{
@@ -92,14 +89,13 @@ enum class Configuration : uint8 {
 #define SETTINGS_GENERAL_BYTE_COUNT 24
 typedef struct {
   Version version;
-  uint16 writeCount;
+  uint16_t writeCount;
   Configuration config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
   uint8 PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
-  uint32 crc; // Calculated over entire flash page. Assumed to be 0 during calculation
+  uint8_t numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
   uint8 numPinStructsInSettings; // number of pin structs that follow in settings
-  uint8 brightness; // 0-255
-  uint8 PADDING_USE_ME_1[2];
-  uint32 maxPowerMilliwatts;
+  uint8_t PADDING_USE_ME_1[2];
+  uint32_t maxPowerMilliwatts;
   // Wifi ID, password, and encryption level?
 
   // When adding fields:
@@ -108,7 +104,7 @@ typedef struct {
   //   * Increase byte count (SETTINGS_GENERAL_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
   //   * Add fields to serialize() and ParsePinVariable() in main.cpp
-  uint8 reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
+  uint8_t reserved[SETTINGS_GENERAL_SIZE-SETTINGS_GENERAL_BYTE_COUNT];
 } SettingsGeneral;
 _Static_assert(SETTINGS_GENERAL_SIZE == sizeof(SettingsGeneral), "");
 const int SettingsGeneralJsonCapacity = JSON_OBJECT_SIZE(6);
@@ -121,10 +117,10 @@ enum function {
 #define NUM_COLORS 5
 #define EASY_LED_PIN_BYTE_COUNT 23
 struct EasyLEDPin {
-  uint8 index;
-  uint8 function; // >0
-  uint16 pattern; // >0
-  uint16 num_leds;// >0
+  uint8_t index;
+  uint8_t function; // >0
+  uint16_t pattern; // >0
+  uint16_t num_leds;// >0
   sint16 offset;  // "pattern" offset relative to the first led of a pattern NOT IMPLEMENTED YET
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
@@ -134,7 +130,7 @@ struct EasyLEDPin {
   //   * Increase byte count (EASY_LED_PIN_BYTE_COUNT)
   //   * Increase number of fields in JsonDocument capacity below
   //   * Add fields to serialize() and deserialize()
-  uint8 reserved[EASY_LED_PIN_SIZE - EASY_LED_PIN_BYTE_COUNT];
+  uint8_t reserved[EASY_LED_PIN_SIZE - EASY_LED_PIN_BYTE_COUNT];
 };
 _Static_assert(sizeof(EasyLEDPin) == EASY_LED_PIN_SIZE, "");
 // This doesn't technically need to be in the .h file since we aren't exposing it
@@ -154,7 +150,7 @@ struct Settings {
     SettingsGeneral general;
     EasyLEDPin pins[MAX_PINS];
     // There's some room yet
-    uint8 reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
+    uint8_t reserved[FLASH_PAGE_SIZE - sizeof(general) - sizeof(pins)];
 
     // Default constructor
     Settings() {};
