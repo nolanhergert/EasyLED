@@ -254,12 +254,12 @@ void setup() {
 
 }
 
-short int led_builtin_val = 0;
-short int led_builtin_breathe_val = 0;
-uint16 ms_after_heartbeat = 0;
-int8 sign = 1;
-short int change = 0;
-unsigned long prevMillis = 0;
+int16_t led_builtin_val = 0;
+int16_t led_builtin_breathe_val = 0;
+uint16_t ms_after_heartbeat = 0;
+int8_t sign = 1;
+int16_t change = 0;
+uint64_t prevMillis = 0;
 void loop() {
 
   server.handleClient();

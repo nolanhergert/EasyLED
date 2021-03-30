@@ -120,7 +120,7 @@ void Settings::deserialize(const String &json) {
     }
     JsonVariant offset = pin["offset"];
     if (!offset.isNull()) {
-      pins[i].offset = offset.as<sint16>();
+      pins[i].offset = offset.as<int16_t>();
     }
     JsonArray colors = pin.createNestedArray("colors");
     if (!colors) {
@@ -143,7 +143,7 @@ void Settings::setDefaults() {
   // Just do a full reset for now?
   // Save off a few fields that shouldn't be changed before zeroing
   Configuration config = general.config;
-  uint16 writeCount = general.writeCount;
+  uint16_t writeCount = general.writeCount;
 
 
   memset(this, 0, sizeof(*this));

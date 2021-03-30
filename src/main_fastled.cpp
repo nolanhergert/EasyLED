@@ -23,8 +23,8 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 #define TOTAL_NUM_LEDS    1440 // just picking a number for now. 10 meters of 144 leds/m, should be plenty
-static uint16 offsets[MAX_PINS]; // initialized to 0s at compile time
-static uint16 lengths[MAX_PINS]; // initialized to 0s at compile time
+static uint16_t offsets[MAX_PINS]; // initialized to 0s at compile time
+static uint16_t lengths[MAX_PINS]; // initialized to 0s at compile time
 static CRGB leds[TOTAL_NUM_LEDS];
 
 

@@ -74,13 +74,13 @@ struct Version
 };
 
 
-//typedef uint8 Configuration;
+//typedef uint8_t Configuration;
 //#define CONFIG_EASYLED_4_PIN  0
 //#define CONFIG_EASYLED_8_PIN  1
 // Can only use values from this enum
 // And it enforces the max size too!
 // https://stackoverflow.com/a/1122109/931280
-enum class Configuration : uint8 {
+enum class Configuration : uint8_t {
   CONFIG_EASYLED_4_PIN = 0,
   CONFIG_EASYLED_8_PIN = 1,
   // Max size of uint8
@@ -91,9 +91,9 @@ typedef struct {
   Version version;
   uint16_t writeCount;
   Configuration config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
-  uint8 PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
+  uint8_t PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint8_t numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
-  uint8 numPinStructsInSettings; // number of pin structs that follow in settings
+  uint8_t numPinStructsInSettings; // number of pin structs that follow in settings
   uint8_t PADDING_USE_ME_1[2];
   uint32_t maxPowerMilliwatts;
   // Wifi ID, password, and encryption level?
@@ -121,7 +121,7 @@ struct EasyLEDPin {
   uint8_t function; // >0
   uint16_t pattern; // >0
   uint16_t num_leds;// >0
-  sint16 offset;  // "pattern" offset relative to the first led of a pattern NOT IMPLEMENTED YET
+  int16_t offset;  // "pattern" offset relative to the first led of a pattern NOT IMPLEMENTED YET
   // In decreasing importance
   CRGB colors[NUM_COLORS]; // rgb
   // When adding fields:
