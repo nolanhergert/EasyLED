@@ -90,6 +90,7 @@ enum class Configuration : uint8_t {
 typedef struct {
   Version version;
   uint16_t writeCount;
+  uint32_t crc; // Calculated over entire flash page. Assumed to be 0 during calculation
   Configuration config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
   uint8_t PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint8_t numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
