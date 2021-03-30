@@ -4,3 +4,4 @@
 .vscode/launch.json
 .vscode/ipch
 index.html.h
+output.map

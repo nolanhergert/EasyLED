@@ -24,13 +24,13 @@ FASTLED_USING_NAMESPACE
 #define COLOR_ORDER GRB
 #define INITIAL_NUM_LEDS 25
 #define TOTAL_NUM_LEDS    MAX_PINS*INITIAL_NUM_LEDS
-uint32 offsets[MAX_PINS];
-uint32 lengths[MAX_PINS];
+uint32_t offsets[MAX_PINS];
+uint32_t lengths[MAX_PINS];
 CRGB leds[TOTAL_NUM_LEDS];
 
 
 // Actual number of pins from settings
-uint8 numPins;
+uint8_t numPins;
 
 
 #define FRAMES_PER_SECOND  200
@@ -109,7 +109,7 @@ void fillnoise8(const EasyLEDPin *pPin) {
 
   #define scale 30                                                          // Don't change this programmatically or everything shakes.
   
-  for(uint32 i = 0; i < pPin->num_leds; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
+  for(uint32_t i = 0; i < pPin->num_leds; i++) {                                       // Just ONE loop to fill up the LED array as all of the pixels change.
     uint8_t index = inoise8(i*scale, millis()/10+i*scale);                   // Get a value from the noise function. I'm using both x and y axis.
     leds[offsets[pPin->index] + i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);    // With that value, look up the 8 bit colour palette value and assign it to the current LED.
   }
@@ -202,8 +202,8 @@ void AddNewLedStrip(int pin, int offset, int length) {
   }
 }
 
-uint8 initialStartupBrightness = 0;
-uint8 initialStartupBrightnessMax;
+uint8_t initialStartupBrightness = 0;
+uint8_t initialStartupBrightnessMax;
 
 
 //static const 
