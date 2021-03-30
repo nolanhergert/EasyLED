@@ -94,6 +94,7 @@ typedef struct {
   Configuration config; // (hardware configuration) 0 = 4-pin EasyLED board, 1 = 8-pin EasyLED board
   uint8_t PADDING_USE_ME_0[1]; // ESP8266 doesn't like "load or store to unaligned address", so we can't pack
   uint8_t numPins; // Always store MAX_PINS in flash, but limit display on GUI to numPins
+  uint8_t brightness; // 0-255
   uint8_t numPinStructsInSettings; // number of pin structs that follow in settings
   uint8_t PADDING_USE_ME_1[2];
   uint32_t maxPowerMilliwatts;
