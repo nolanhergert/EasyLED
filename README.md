@@ -4,6 +4,10 @@ Main use cases:
   * Portable outdoor control and mounting (optional)
   * Very little setup required!
 
+## PCBs
+  * https://oshwlab.com/nhergert/easyled
+  * https://oshwlab.com/nhergert/easyledv2_usbexpander
+
 # Instructions
 
 # Behavior
